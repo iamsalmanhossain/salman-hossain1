@@ -4,6 +4,8 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { ExternalLink, Users, ChevronRight, Mail, Sparkles, ChevronDown } from "lucide-react";
 import GlowCursor from "./GlowCursor";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 
 // Custom SVG Icons for Brands
 const GithubIcon = ({ className }: { className?: string }) => (
@@ -28,6 +30,15 @@ const LinkedinIcon = ({ className }: { className?: string }) => (
 );
 
 export default function Hero() {
+  const { theme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  
+  const isLight = mounted && theme === 'light';
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -50,23 +61,23 @@ export default function Hero() {
   return (
     <section className="h-screen relative overflow-hidden bg-white dark:bg-transparent text-black dark:text-white transition-colors duration-300 w-full">
       <GlowCursor
-        color="#67E8F9"
-        secondaryColor="#A78BFA"
+        color={isLight ? "#0ea5e9" : "#67E8F9"}
+        secondaryColor={isLight ? "#8b5cf6" : "#A78BFA"}
         trailLength={40}
         trailWidth={8}
         trailTaper={0.8}
         followSpeed={0.16}
-        glowIntensity={1.9}
+        glowIntensity={isLight ? 2.5 : 1.9}
         glowSpread={1.2}
         hotspot={0.65}
         brightness={1.25}
-        opacity={1}
+        opacity={isLight ? 0.8 : 1}
         pulseSpeed={1.1}
         noiseStrength={0.035}
         idleFade
         idleTimeout={700}
         fadeDuration={900}
-        blendMode="screen"
+        blendMode={isLight ? "normal" : "screen"}
         className="w-full h-full"
       >
         <div className="flex items-center justify-center w-full h-full px-4 sm:px-8 lg:px-16 pt-10 pb-6">
