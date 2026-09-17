@@ -1,14 +1,23 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import { useTheme } from "next-themes";
+import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
 const TechSphere: React.FC = () => {
   const mountRef = useRef<HTMLDivElement>(null);
+  const { theme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (!mountRef.current) return;
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mountRef.current || !mounted) return;
+    
+    const isLight = theme === 'light';
 
     const currentMount = mountRef.current;
     
@@ -40,10 +49,10 @@ const TechSphere: React.FC = () => {
     const sphereGeo = new THREE.IcosahedronGeometry(sphereRadius, 2);
     
     const wireframeMat = new THREE.MeshBasicMaterial({
-      color: 0x8b4513,
+      color: isLight ? 0x1a202c : 0x8b4513,
       wireframe: true,
       transparent: true,
-      opacity: 0.35,
+      opacity: isLight ? 0.15 : 0.35,
     });
     const wireframeSphere = new THREE.Mesh(sphereGeo, wireframeMat);
     scene.add(wireframeSphere);
@@ -51,9 +60,9 @@ const TechSphere: React.FC = () => {
     // ভেতরের আবছা গ্লো ইফেক্ট
     const innerCoreGeo = new THREE.SphereGeometry(sphereRadius * 0.98, 32, 32);
     const innerCoreMat = new THREE.MeshBasicMaterial({
-      color: 0x2b1d14,
+      color: isLight ? 0x94a3b8 : 0x2b1d14,
       transparent: true,
-      opacity: 0.25,
+      opacity: isLight ? 0.2 : 0.25,
     });
     const innerCore = new THREE.Mesh(innerCoreGeo, innerCoreMat);
     scene.add(innerCore);
@@ -65,7 +74,7 @@ const TechSphere: React.FC = () => {
       { name: "Kotlin", symbol: "◆", color: "#a97bff" },
       { name: "MySQL", symbol: "🐬", color: "#00758f" },
       { name: "Firebase", symbol: "🔥", color: "#ffca28" },
-      { name: "Linux", symbol: "🐧", color: "#ffffff" },
+      { name: "Linux", symbol: "🐧", color: isLight ? "#000000" : "#ffffff" },
       { name: "GCP", symbol: "☁", color: "#4285f4" },
       { name: "Android", symbol: "🤖", color: "#78c257" },
       { name: "Bash", symbol: ">_", color: "#4eaa25" },
@@ -92,7 +101,7 @@ const TechSphere: React.FC = () => {
         ctx.font = "bold 85px sans-serif";
         ctx.fillText(item.symbol, 128, 100);
 
-        ctx.fillStyle = "#cfd8dc";
+        ctx.fillStyle = isLight ? "#1a202c" : "#cfd8dc";
         ctx.font = "bold 26px monospace";
         ctx.fillText(item.name, 128, 185);
       }
@@ -152,7 +161,7 @@ const TechSphere: React.FC = () => {
       renderer.dispose();
       scene.clear();
     };
-  }, []);
+  }, [theme, mounted]);
 
   return (
     <div 

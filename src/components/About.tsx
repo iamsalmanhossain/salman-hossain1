@@ -32,7 +32,7 @@ export default function About() {
   ];
 
   return (
-    <section id="about" className="py-20 px-4 sm:px-8 lg:px-16 w-full bg-gray-50 dark:bg-[#0E1015] transition-colors duration-300 relative z-10">
+    <section id="about" className="py-20 px-4 sm:px-8 lg:px-16 w-full bg-transparent transition-colors duration-300 relative z-10">
       <div className="max-w-5xl mx-auto w-full">
         <motion.div 
           initial="hidden"
@@ -76,7 +76,7 @@ export default function About() {
 
             {/* Personal Details */}
             <motion.div variants={itemVariants} className="lg:col-span-5">
-              <div className="bg-white dark:bg-[#1A1C23] p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-white/5 shadow-lg flex flex-col gap-6 transition-colors duration-300">
+              <div className="bg-white/80 dark:bg-[#1A1C23]/80 backdrop-blur-md p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-white/5 shadow-lg flex flex-col gap-6 transition-colors duration-300">
                 <h3 className="text-lg font-semibold text-black dark:text-white border-b border-gray-200 dark:border-white/10 pb-4">
                   Personal Details
                 </h3>
