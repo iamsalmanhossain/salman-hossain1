@@ -74,8 +74,6 @@ export const fetchApi = (async (endpoint: string, options: FetchOptions = {}): P
     config.body = data instanceof FormData ? data : JSON.stringify(data);
   }
 
-  config.credentials = 'include';
-
   try {
     const formattedApiUrl = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
     const formattedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
@@ -124,7 +122,7 @@ export const fetchApi = (async (endpoint: string, options: FetchOptions = {}): P
         return new Promise((resolve, reject) => {
           const refreshUrl = `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`;
 
-          fetch(refreshUrl, { method: 'POST', credentials: 'include' })
+          fetch(refreshUrl, { method: 'POST' })
             .then(async (res) => {
               const resData = await res.json();
               if (resData?.success && resData?.data?.accessToken) {

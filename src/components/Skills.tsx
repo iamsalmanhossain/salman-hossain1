@@ -4,11 +4,14 @@ import { useTheme } from "next-themes";
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { motion, Variants, AnimatePresence } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const TechSphere: React.FC = () => {
   const mountRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
     setMounted(true);
@@ -16,11 +19,11 @@ const TechSphere: React.FC = () => {
 
   useEffect(() => {
     if (!mountRef.current || !mounted) return;
-    
+
     const isLight = theme === 'light';
 
     const currentMount = mountRef.current;
-    
+
     // ১. সিন, ক্যামেরা ও রেন্ডারার সেটআপ
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(
@@ -44,28 +47,30 @@ const TechSphere: React.FC = () => {
     controls.autoRotateSpeed = 1.2;
     controls.enableZoom = false; // জুম বন্ধ রাখতে চাইলে false দিন
 
-    // ৩. মাঝখানের Wireframe Sphere (জালিকা কাঠামো)
+    // ৩. মাঝখানের Earth Sphere
     const sphereRadius = 8.5;
-    const sphereGeo = new THREE.IcosahedronGeometry(sphereRadius, 2);
-    
-    const wireframeMat = new THREE.MeshBasicMaterial({
-      color: isLight ? 0x1a202c : 0x8b4513,
-      wireframe: true,
-      transparent: true,
-      opacity: isLight ? 0.15 : 0.35,
-    });
-    const wireframeSphere = new THREE.Mesh(sphereGeo, wireframeMat);
-    scene.add(wireframeSphere);
+    const sphereGeo = new THREE.SphereGeometry(sphereRadius, 64, 64);
 
-    // ভেতরের আবছা গ্লো ইফেক্ট
-    const innerCoreGeo = new THREE.SphereGeometry(sphereRadius * 0.98, 32, 32);
-    const innerCoreMat = new THREE.MeshBasicMaterial({
-      color: isLight ? 0x94a3b8 : 0x2b1d14,
+    const textureLoader = new THREE.TextureLoader();
+    const earthTexture = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg');
+
+    const earthMat = new THREE.MeshStandardMaterial({
+      map: earthTexture,
+      roughness: 0.6,
+      metalness: 0.1,
       transparent: true,
-      opacity: isLight ? 0.2 : 0.25,
+      opacity: isLight ? 0.95 : 0.85,
     });
-    const innerCore = new THREE.Mesh(innerCoreGeo, innerCoreMat);
-    scene.add(innerCore);
+    const earthSphere = new THREE.Mesh(sphereGeo, earthMat);
+    scene.add(earthSphere);
+
+    // Add Lights for the Earth
+    const ambientLight = new THREE.AmbientLight(0xffffff, isLight ? 1.5 : 0.8);
+    scene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, isLight ? 2 : 1.5);
+    directionalLight.position.set(10, 15, 10);
+    scene.add(directionalLight);
 
     // ৪. টেকনোলজি আইটেম তালিকা
     const techItems = [
@@ -131,8 +136,8 @@ const TechSphere: React.FC = () => {
       const sprite = createIconSprite(tech);
       const iconRadius = sphereRadius * 1.08;
       sprite.position.set(x * iconRadius, y * iconRadius, z * iconRadius);
-      
-      wireframeSphere.add(sprite);
+
+      earthSphere.add(sprite);
     });
 
     // ৬. রেসপন্সিভ হ্যান্ডলার
@@ -163,18 +168,165 @@ const TechSphere: React.FC = () => {
     };
   }, [theme, mounted]);
 
+  const skillCategories = [
+    {
+      title: "Frontend Development",
+      skills: [
+        { name: "React / Next.js", icon: "⚛️" },
+        { name: "Three.js", icon: "▲" },
+        { name: "Tailwind CSS", icon: "🎨" },
+        { name: "Framer Motion", icon: "✨" },
+      ]
+    },
+    {
+      title: "Backend & Database",
+      skills: [
+        { name: "Node.js", icon: "🟢" },
+        { name: "MySQL", icon: "🐬" },
+        { name: "Firebase", icon: "🔥" },
+        { name: "Prisma", icon: "◭" },
+        { name: "GraphQL", icon: "⬢" },
+      ]
+    },
+    {
+      title: "DevOps & Cloud",
+      skills: [
+        { name: "Kubernetes", icon: "☸" },
+        { name: "Terraform", icon: "⬡" },
+        { name: "Linux / Bash", icon: "🐧" },
+        { name: "GCP / Azure", icon: "☁" },
+        { name: "Git", icon: "📦" },
+      ]
+    },
+    {
+      title: "Languages",
+      skills: [
+        { name: "C++", icon: "C++" },
+        { name: "Rust", icon: "⚙" },
+        { name: "Kotlin", icon: "◆" },
+      ]
+    }
+  ];
+
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  };
+
+  const itemVariants: Variants = {
+    hidden: { opacity: 0, x: 20 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.4 } }
+  };
+
   return (
-    <div 
-      ref={mountRef} 
-      style={{ 
-        width: "100%", 
-        height: "600px", // আপনার প্রয়োজন মতো হাইট পরিবর্তন করতে পারেন
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "transparent"
-      }} 
-    />
+    <section id="skills" className="w-full bg-transparent py-20 relative z-10 overflow-x-hidden">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-8 lg:px-16">
+
+        <div className="flex flex-col gap-2 mb-12">
+          <h2 className="text-3xl sm:text-4xl font-bold text-black dark:text-white">
+            Technical Skills
+          </h2>
+          <div className="w-16 h-1 bg-gradient-to-r from-blue-500 to-emerald-400 rounded-full" />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+
+          {/* Left Side: 3D Earth */}
+          <div className="order-2 lg:order-1 flex justify-center items-center">
+            <div
+              ref={mountRef}
+              style={{
+                width: "100%",
+                maxWidth: "600px",
+                height: "600px",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: "transparent"
+              }}
+            />
+          </div>
+
+          {/* Right Side: Categorized Skills Carousel */}
+          <div className="order-1 lg:order-2 flex flex-col items-center justify-center w-full relative">
+            
+            {/* Title */}
+            <h3 className="text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-emerald-400 text-center uppercase tracking-widest mb-6">
+              {skillCategories[activeIndex].title}
+            </h3>
+
+            {/* Content block with fixed height and side arrows */}
+            <div className="flex items-center w-full gap-2 sm:gap-4 relative">
+              
+              <button 
+                onClick={() => setActiveIndex((prev) => (prev - 1 + skillCategories.length) % skillCategories.length)} 
+                className="p-2 rounded-full bg-white dark:bg-[#0E1015] hover:bg-gray-100 dark:hover:bg-white/5 transition-all shadow-sm flex-shrink-0 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-white/5 z-10"
+              >
+                <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+              </button>
+              
+              <div className="flex-1 h-[600px] overflow-y-auto overflow-x-hidden rounded-2xl bg-white/50 dark:bg-[#1A1C23]/50 backdrop-blur-sm border border-gray-100 dark:border-white/5 shadow-inner p-4 sm:p-6">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeIndex}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex flex-col gap-4 w-full max-w-xs sm:max-w-sm mx-auto"
+                  >
+                    {skillCategories[activeIndex].skills.map((skill, sIdx) => (
+                      <div 
+                        key={sIdx} 
+                        className="flex items-center gap-4 w-full group"
+                      >
+                        {/* Logo Box */}
+                        <div className="flex-shrink-0 w-[56px] min-w-[56px] max-w-[56px] h-[56px] min-h-[56px] max-h-[56px] sm:w-[64px] sm:min-w-[64px] sm:max-w-[64px] sm:h-[64px] sm:min-h-[64px] sm:max-h-[64px] flex items-center justify-center bg-white dark:bg-[#0E1015] rounded-xl border border-gray-200 dark:border-white/10 shadow-sm transition-all group-hover:border-emerald-500/50">
+                          {skill.icon.length > 2 && !skill.icon.includes('️') ? (
+                             <span className="text-xs font-bold text-gray-500 dark:text-gray-400 group-hover:text-emerald-500 transition-colors">{skill.icon}</span>
+                          ) : (
+                             <span className="text-2xl sm:text-3xl group-hover:scale-110 transition-transform">{skill.icon}</span>
+                          )}
+                        </div>
+                        
+                        {/* Name Box */}
+                        <div className="flex-1 h-[56px] min-h-[56px] sm:h-[64px] sm:min-h-[64px] flex items-center px-6 bg-white dark:bg-[#0E1015] rounded-xl border border-gray-200 dark:border-white/10 shadow-sm transition-all group-hover:border-emerald-500/50">
+                          <span className="text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 group-hover:text-emerald-500 transition-colors">{skill.name}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+
+              <button 
+                onClick={() => setActiveIndex((prev) => (prev + 1) % skillCategories.length)} 
+                className="p-2 rounded-full bg-white dark:bg-[#0E1015] hover:bg-gray-100 dark:hover:bg-white/5 transition-all shadow-sm flex-shrink-0 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-white/5 z-10"
+              >
+                <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+              </button>
+
+            </div>
+            
+            {/* Pagination dots */}
+            <div className="flex gap-2 mt-6">
+              {skillCategories.map((_, idx) => (
+                <button 
+                  key={idx}
+                  onClick={() => setActiveIndex(idx)}
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${idx === activeIndex ? 'bg-gradient-to-r from-blue-500 to-emerald-400 w-8' : 'bg-gray-300 dark:bg-gray-600'}`}
+                />
+              ))}
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </section>
   );
 };
 

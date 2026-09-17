@@ -55,7 +55,7 @@ export default function Sidebar() {
       {isMobile && !isExpanded && (
         <button 
           onClick={() => setIsExpanded(true)}
-          className="fixed top-4 left-4 z-[60] p-2 bg-white dark:bg-[#1A1C23] rounded-md text-black dark:text-white border border-gray-200 dark:border-white/10 shadow-lg"
+          className="fixed top-4 left-4 z-[999] p-2 bg-white dark:bg-[#1A1C23] rounded-md text-black dark:text-white border border-gray-200 dark:border-white/10 shadow-lg"
         >
           <Menu className="w-5 h-5" />
         </button>
@@ -69,7 +69,7 @@ export default function Sidebar() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setIsExpanded(false)}
-            className="fixed inset-0 bg-black/60 z-[40] md:hidden backdrop-blur-sm"
+            className="fixed inset-0 bg-black/60 z-[998] md:hidden backdrop-blur-sm"
           />
         )}
       </AnimatePresence>
@@ -80,7 +80,7 @@ export default function Sidebar() {
           width: isExpanded ? 240 : (isMobile ? 0 : 80),
           x: isMobile ? (isExpanded ? 0 : -240) : 0
         }}
-        className="fixed left-0 top-0 h-screen bg-gray-50 dark:bg-[#0E1015] border-r border-gray-200 dark:border-white/5 flex flex-col z-[50] overflow-visible transition-colors duration-300"
+        className="fixed left-0 top-0 h-screen bg-gray-50 dark:bg-[#0E1015] border-r border-gray-200 dark:border-white/5 flex flex-col z-[999] overflow-visible transition-colors duration-300"
       >
         {/* Top Section - Logo & Toggle */}
         <div className="flex items-center justify-between p-4 h-20 relative">
@@ -113,7 +113,13 @@ export default function Sidebar() {
           <ul className="space-y-2 px-3">
             {navItems.map((item, index) => (
               <li key={index}>
-                <Link href={item.href} className="flex items-center gap-4 px-3 py-3 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-all group relative">
+                <Link 
+                  href={item.href} 
+                  onClick={() => {
+                    if (isMobile) setIsExpanded(false);
+                  }}
+                  className="flex items-center gap-4 px-3 py-3 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-all group relative"
+                >
                   <item.icon className="w-5 h-5 shrink-0 group-hover:text-blue-500 dark:group-hover:text-cyan-400 transition-colors" />
                   
                   <AnimatePresence>

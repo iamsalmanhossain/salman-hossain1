@@ -1,11 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { ExternalLink, Users, ChevronRight, Mail, Sparkles, ChevronDown } from "lucide-react";
 import GlowCursor from "./GlowCursor";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { HeroSectionService } from "@/services/heroSection.service";
 
 // Custom SVG Icons for Brands
 const GithubIcon = ({ className }: { className?: string }) => (
@@ -33,13 +35,20 @@ export default function Hero() {
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
+  const { data: heroData } = useQuery({
+    queryKey: ['hero'],
+    queryFn: () => HeroSectionService.getHeroSection(),
+  });
+
+  const hero = heroData?.data;
+
   useEffect(() => {
     setMounted(true);
   }, []);
   
   const isLight = mounted && theme === 'light';
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -49,7 +58,7 @@ export default function Hero() {
     },
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 10 },
     visible: {
       opacity: 1,
@@ -59,9 +68,9 @@ export default function Hero() {
   };
 
   return (
-    <section className="h-screen relative overflow-hidden bg-transparent text-black dark:text-white transition-colors duration-300 w-full">
+    <section id="home" className="h-screen relative overflow-hidden bg-transparent text-black dark:text-white transition-colors duration-300 w-full">
       <div className="flex items-center justify-center w-full h-full px-4 sm:px-8 lg:px-16 pt-10 pb-6">
-        <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center z-10 relative w-full">
+        <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center z-10 relative w-full">
           
           {/* Left Column - Image */}
           <motion.div 
@@ -113,16 +122,14 @@ export default function Hero() {
 
             <motion.h1 variants={itemVariants} className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-3 pointer-events-auto">
               <span className="text-gray-500 dark:text-gray-400 font-light">Hello, I am</span>{" "}
-              <span className="text-black dark:text-white transition-colors duration-300">Abass Alzouma</span>
+              <span className="text-black dark:text-white transition-colors duration-300">{hero?.title || "Abass Alzouma"}</span>
             </motion.h1>
 
             {/* A small underline accent */}
             <motion.div variants={itemVariants} className="w-12 h-1 bg-[#4ade80] rounded-full mb-4 pointer-events-auto" />
 
             <motion.p variants={itemVariants} className="text-gray-600 dark:text-gray-400 text-sm sm:text-base leading-relaxed mb-4 max-w-xl pointer-events-auto">
-              Passionate web and mobile developer with over 6 years of experience in programming and web technologies. 
-              Through my work, I turn ideas into modern visual and digital experiences by combining web development, 
-              graphic design, motion design, video editing, and content creation.
+              {hero?.description || "Passionate web and mobile developer with over 6 years of experience in programming and web technologies. Through my work, I turn ideas into modern visual and digital experiences by combining web development, graphic design, motion design, video editing, and content creation."}
             </motion.p>
 
             <motion.a variants={itemVariants} href="#" className="text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors text-xs font-medium underline underline-offset-4 mb-6 block pointer-events-auto">
