@@ -39,7 +39,6 @@ export default function PixelSnow({
 
     // Set up scene, camera, and renderer
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#000000'); // Black background for space/snow
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, farPlane);
     camera.position.z = 5;
 
