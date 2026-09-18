@@ -46,16 +46,16 @@ export default function CertificatesDashboard() {
   const openModal = (certificate?: Certificate) => {
     if (certificate) {
       setEditingId(certificate.id);
-      setValue("name", certificate.name);
-      setValue("organization", certificate.organization);
-      setValue("issueDate", new Date(certificate.issueDate).toISOString().split('T')[0]);
+      setValue("title", certificate.title);
+      setValue("issuer", certificate.issuer);
+      setValue("issueDate", certificate.issueDate ? new Date(certificate.issueDate).toISOString().split('T')[0] : "");
       setValue("credentialUrl", certificate.credentialUrl);
       setValue("image", certificate.image);
     } else {
       setEditingId(null);
       reset({
-        name: "",
-        organization: "",
+        title: "",
+        issuer: "",
         issueDate: "",
         credentialUrl: "",
         image: "",
@@ -73,7 +73,7 @@ export default function CertificatesDashboard() {
   const onSubmit = (formData: CreateCertificateDto) => {
     const dataToSubmit = {
       ...formData,
-      issueDate: new Date(formData.issueDate).toISOString()
+      issueDate: formData.issueDate ? new Date(formData.issueDate).toISOString() : undefined
     };
 
     if (editingId) {
@@ -118,7 +118,7 @@ export default function CertificatesDashboard() {
               {data?.data?.map((certificate: Certificate) => (
                 <tr key={certificate.id} className="border-b border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
                   <td className="p-4">
-                    <p className="font-semibold text-black dark:text-white">{certificate.name}</p>
+                    <p className="font-semibold text-black dark:text-white">{certificate.title}</p>
                     {certificate.credentialUrl && (
                       <a href={certificate.credentialUrl} target="_blank" rel="noreferrer" className="text-xs text-blue-500 hover:underline flex items-center gap-1 mt-1">
                         <ExternalLink className="w-3 h-3" /> View Credential
@@ -126,11 +126,11 @@ export default function CertificatesDashboard() {
                     )}
                   </td>
                   <td className="p-4">
-                    <p className="font-medium text-gray-700 dark:text-gray-300">{certificate.organization}</p>
+                    <p className="font-medium text-gray-700 dark:text-gray-300">{certificate.issuer}</p>
                   </td>
                   <td className="p-4">
                     <span className="text-sm text-gray-600 dark:text-gray-400">
-                      {new Date(certificate.issueDate).toLocaleDateString()}
+                      {certificate.issueDate ? new Date(certificate.issueDate).toLocaleDateString() : "N/A"}
                     </span>
                   </td>
                   <td className="p-4 text-right">
@@ -186,12 +186,12 @@ export default function CertificatesDashboard() {
               <form id="certificateForm" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div className="space-y-1">
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
-                  <input {...register("name", { required: true })} className="w-full px-4 py-2 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" placeholder="E.g., AWS Certified Developer" />
+                  <input {...register("title", { required: true })} className="w-full px-4 py-2 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" placeholder="E.g., AWS Certified Developer" />
                 </div>
 
                 <div className="space-y-1">
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Organization</label>
-                  <input {...register("organization", { required: true })} className="w-full px-4 py-2 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" placeholder="E.g., Amazon Web Services" />
+                  <input {...register("issuer", { required: true })} className="w-full px-4 py-2 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" placeholder="E.g., Amazon Web Services" />
                 </div>
 
                 <div className="space-y-1">

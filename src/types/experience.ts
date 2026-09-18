@@ -1,8 +1,10 @@
+
+
 export interface Experience {
   id: string;
   company: string;
   position: string;
-  description: string;
+  description?: string;
   startDate: string;
   endDate?: string;
   isCurrent: boolean;

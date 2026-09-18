@@ -48,13 +48,15 @@ export default function SocialLinksDashboard() {
       setEditingId(link.id);
       setValue("platform", link.platform);
       setValue("url", link.url);
-      setValue("icon", link.icon);
+      setValue("iconUrl", link.iconUrl);
+      setValue("heroSectionId", link.heroSectionId);
     } else {
       setEditingId(null);
       reset({
         platform: "",
         url: "",
-        icon: "",
+        iconUrl: "",
+        heroSectionId: "",
       });
     }
     setIsModalOpen(true);
@@ -177,8 +179,13 @@ export default function SocialLinksDashboard() {
                 </div>
 
                 <div className="space-y-1">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Hero Section ID</label>
+                  <input {...register("heroSectionId", { required: true })} className="w-full px-4 py-2 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" placeholder="Enter Hero Section ID" />
+                </div>
+
+                <div className="space-y-1">
                   <Controller
-                    name="icon"
+                    name="iconUrl"
                     control={control}
                     render={({ field }) => (
                       <FileUpload

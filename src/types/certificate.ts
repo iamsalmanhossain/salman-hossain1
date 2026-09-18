@@ -1,10 +1,12 @@
+
+
 export interface Certificate {
   id: string;
-  name: string;
-  organization: string;
-  issueDate: string;
+  title: string;
+  issuer: string;
   credentialUrl?: string;
   image?: string;
+  issueDate?: string;
   createdAt: string;
   updatedAt: string;
 }

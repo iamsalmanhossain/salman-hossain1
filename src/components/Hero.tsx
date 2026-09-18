@@ -122,14 +122,14 @@ export default function Hero() {
 
             <motion.h1 variants={itemVariants} className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-3 pointer-events-auto">
               <span className="text-gray-500 dark:text-gray-400 font-light">Hello, I am</span>{" "}
-              <span className="text-black dark:text-white transition-colors duration-300">{hero?.title || "Abass Alzouma"}</span>
+              <span className="text-black dark:text-white transition-colors duration-300">{hero?.heroTitle || "Abass Alzouma"}</span>
             </motion.h1>
 
             {/* A small underline accent */}
             <motion.div variants={itemVariants} className="w-12 h-1 bg-[#4ade80] rounded-full mb-4 pointer-events-auto" />
 
             <motion.p variants={itemVariants} className="text-gray-600 dark:text-gray-400 text-sm sm:text-base leading-relaxed mb-4 max-w-xl pointer-events-auto">
-              {hero?.description || "Passionate web and mobile developer with over 6 years of experience in programming and web technologies. Through my work, I turn ideas into modern visual and digital experiences by combining web development, graphic design, motion design, video editing, and content creation."}
+              {hero?.heroDescription || "Passionate web and mobile developer with over 6 years of experience in programming and web technologies. Through my work, I turn ideas into modern visual and digital experiences by combining web development, graphic design, motion design, video editing, and content creation."}
             </motion.p>
 
             <motion.a variants={itemVariants} href="#" className="text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors text-xs font-medium underline underline-offset-4 mb-6 block pointer-events-auto">

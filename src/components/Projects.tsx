@@ -107,9 +107,9 @@ export default function Projects() {
                       <span>Live Demo</span>
                     </a>
                   )}
-                  {project.githubUrl && (
+                  {project.githubFrontendUrl && (
                     <a 
-                      href={project.githubUrl}
+                      href={project.githubFrontendUrl}
                       target="_blank" rel="noreferrer"
                       className="flex items-center justify-center p-2.5 bg-gray-100 dark:bg-white/5 text-black dark:text-white rounded-xl hover:bg-gray-200 dark:hover:bg-white/10 transition-colors border border-gray-200 dark:border-white/10"
                     >

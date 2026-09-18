@@ -1,9 +1,17 @@
+
+
 export interface SeoSetting {
   id: string;
-  title: string;
-  description: string;
-  keywords: string;
+  siteName?: string;
+  metaTitle: string;
+  metaDescription: string;
+  metaKeywords: string[];
+  author?: string;
+  favicon?: string;
+  ogTitle?: string;
+  ogDescription?: string;
   ogImage?: string;
+  twitterCard?: string;
   createdAt: string;
   updatedAt: string;
 }

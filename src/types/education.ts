@@ -1,11 +1,13 @@
+
+
 export interface Education {
   id: string;
+  institute: string;
   degree: string;
-  institution: string;
-  fieldOfStudy: string;
-  startDate: string;
-  endDate?: string;
-  description?: string;
+  field?: string;
+  image?: string;
+  startYear: number;
+  endYear?: number;
   createdAt: string;
   updatedAt: string;
 }

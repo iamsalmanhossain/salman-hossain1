@@ -46,17 +46,17 @@ export default function TestimonialsDashboard() {
   const openModal = (testimonial?: Testimonial) => {
     if (testimonial) {
       setEditingId(testimonial.id);
-      setValue("clientName", testimonial.clientName);
+      setValue("name", testimonial.name);
       setValue("designation", testimonial.designation);
-      setValue("message", testimonial.message);
-      setValue("avatar", testimonial.avatar);
+      setValue("review", testimonial.review);
+      setValue("image", testimonial.image);
     } else {
       setEditingId(null);
       reset({
-        clientName: "",
+        name: "",
         designation: "",
-        message: "",
-        avatar: "",
+        review: "",
+        image: "",
       });
     }
     setIsModalOpen(true);
@@ -111,22 +111,22 @@ export default function TestimonialsDashboard() {
                 <tr key={testimonial.id} className="border-b border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
                   <td className="p-4">
                     <div className="flex items-center gap-3">
-                      {testimonial.avatar ? (
-                        <img src={testimonial.avatar} alt={testimonial.clientName} className="w-10 h-10 object-cover rounded-full" />
+                      {testimonial.image ? (
+                        <img src={testimonial.image} alt={testimonial.name} className="w-10 h-10 object-cover rounded-full" />
                       ) : (
                         <div className="w-10 h-10 bg-gray-200 dark:bg-white/10 rounded-full flex items-center justify-center text-gray-500 text-lg font-bold">
-                          {testimonial.clientName.charAt(0).toUpperCase()}
+                          {testimonial.name.charAt(0).toUpperCase()}
                         </div>
                       )}
                       <div>
-                        <p className="font-semibold text-black dark:text-white">{testimonial.clientName}</p>
+                        <p className="font-semibold text-black dark:text-white">{testimonial.name}</p>
                         <p className="text-xs text-gray-500">{testimonial.designation}</p>
                       </div>
                     </div>
                   </td>
                   <td className="p-4">
                     <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 max-w-md italic">
-                      "{testimonial.message}"
+                      "{testimonial.review}"
                     </p>
                   </td>
                   <td className="p-4 text-right">
@@ -182,7 +182,7 @@ export default function TestimonialsDashboard() {
               <form id="testimonialForm" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div className="space-y-1">
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Client Name</label>
-                  <input {...register("clientName", { required: true })} className="w-full px-4 py-2 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" placeholder="E.g., John Doe" />
+                  <input {...register("name", { required: true })} className="w-full px-4 py-2 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" placeholder="E.g., John Doe" />
                 </div>
 
                 <div className="space-y-1">
@@ -192,12 +192,12 @@ export default function TestimonialsDashboard() {
 
                 <div className="space-y-1">
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Message</label>
-                  <textarea {...register("message", { required: true })} rows={4} className="w-full px-4 py-2 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" placeholder="What did they say about you?" />
+                  <textarea {...register("review", { required: true })} rows={4} className="w-full px-4 py-2 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" placeholder="What did they say about you?" />
                 </div>
 
                 <div className="space-y-1">
                   <Controller
-                    name="avatar"
+                    name="image"
                     control={control}
                     render={({ field }) => (
                       <FileUpload

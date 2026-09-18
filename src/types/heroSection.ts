@@ -1,10 +1,21 @@
+import { SocialLink } from './socialLinks';
+
+
 export interface HeroSection {
   id: string;
-  title: string;
-  subtitle: string;
-  description: string;
+  heroTitle: string;
+  designations: string[];
+  heroDescription?: string;
+  profileImage?: string;
   resumeUrl?: string;
-  image?: string;
+  about: string;
+  experienceYears?: number;
+  totalProjects?: number;
+  email?: string;
+  phone?: string;
+  location?: string;
+  socialLinks: SocialLink[];
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
