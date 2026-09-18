@@ -1,4 +1,4 @@
-export type SkillCategory = 'FRONTEND' | 'BACKEND' | 'TOOLS' | 'OTHER';
+export type SkillCategory = 'FRONTEND' | 'BACKEND' | 'DATABASE' | 'DEVOPS' | 'TOOL';
 
 export interface Skill {
   id: string;
@@ -6,6 +6,7 @@ export interface Skill {
   icon?: string;
   level?: number;
   category: SkillCategory;
+  showIn3d?: boolean;
   createdAt: string;
   updatedAt: string;
 }

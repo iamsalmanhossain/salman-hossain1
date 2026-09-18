@@ -11,6 +11,7 @@ export interface HeroSection {
   about: string;
   experienceYears?: number;
   totalProjects?: number;
+  totalToolsAndTech?: number;
   email?: string;
   phone?: string;
   location?: string;

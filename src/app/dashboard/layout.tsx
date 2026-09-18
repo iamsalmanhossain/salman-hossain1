@@ -22,7 +22,8 @@ import {
   Link as LinkIcon,
   Tags,
   Search,
-  Type
+  Type,
+  Palette
 } from "lucide-react";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
@@ -74,6 +75,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { name: "Testimonials", icon: MessageSquare, href: "/dashboard/testimonials" },
     { name: "Social Links", icon: LinkIcon, href: "/dashboard/social-links" },
     { name: "SEO Settings", icon: Search, href: "/dashboard/seo-settings" },
+    { name: "Customize Theme", icon: Palette, href: "/dashboard/customize" },
   ];
 
   if (!accessToken) return null; // Prevent flicker before redirect
@@ -177,8 +179,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </header>
 
           {/* Page Content */}
-          <main className="flex-1 overflow-y-auto p-4 sm:p-8 bg-gray-50 dark:bg-[#0A0A0A]">
-            <div className="max-w-6xl mx-auto">
+          <main className={`flex-1 overflow-y-auto bg-gray-50 dark:bg-[#0A0A0A] ${pathname === '/dashboard/customize' ? 'p-0 flex flex-col' : 'p-4 sm:p-8'}`}>
+            <div className={`mx-auto ${pathname === '/dashboard/customize' ? 'max-w-full flex-1 w-full flex flex-col' : 'max-w-6xl'}`}>
               {children}
             </div>
           </main>

@@ -86,7 +86,7 @@ export default function Hero() {
             <div className="relative aspect-[4/5] w-full rounded-3xl overflow-hidden bg-gray-200 dark:bg-[#382F75] transition-colors duration-300 shadow-2xl">
                <div className="w-full h-full relative">
                  <Image 
-                   src="https://i.ibb.co/JwJPT9qY/profile-Fb.jpg" 
+                   src={hero?.profileImage || "https://i.ibb.co/JwJPT9qY/profile-Fb.jpg"} 
                    alt="Profile" 
                    fill
                    className="object-cover" 
@@ -115,10 +115,12 @@ export default function Hero() {
             animate="visible"
             className="order-1 lg:order-2 flex flex-col items-start text-left mx-auto lg:mx-0 max-w-lg w-full pointer-events-none"
           >
-            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 mb-4 transition-colors duration-300 pointer-events-auto">
-              <Sparkles className="w-3 h-3 text-orange-400" />
-              <span className="text-xs font-medium text-gray-700 dark:text-gray-300">UI/UX En</span>
-            </motion.div>
+            {hero?.designations && hero.designations.length > 0 && (
+              <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 mb-4 transition-colors duration-300 pointer-events-auto">
+                <Sparkles className="w-3 h-3 text-orange-400" />
+                <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{hero.designations[0]}</span>
+              </motion.div>
+            )}
 
             <motion.h1 variants={itemVariants} className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-3 pointer-events-auto">
               <span className="text-gray-500 dark:text-gray-400 font-light">Hello, I am</span>{" "}
@@ -139,33 +141,35 @@ export default function Hero() {
             {/* Stats */}
             <motion.div variants={itemVariants} className="grid grid-cols-3 gap-4 w-full max-w-md mb-6 pointer-events-auto">
               <div>
-                <h3 className="text-2xl sm:text-3xl font-bold text-black dark:text-white mb-1 transition-colors duration-300">6+</h3>
+                <h3 className="text-2xl sm:text-3xl font-bold text-black dark:text-white mb-1 transition-colors duration-300">{hero?.experienceYears || 0}+</h3>
                 <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 transition-colors duration-300">Years of Experience</p>
               </div>
               <div>
-                <h3 className="text-2xl sm:text-3xl font-bold text-black dark:text-white mb-1 transition-colors duration-300">35+</h3>
+                <h3 className="text-2xl sm:text-3xl font-bold text-black dark:text-white mb-1 transition-colors duration-300">{hero?.totalProjects || 0}+</h3>
                 <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 transition-colors duration-300">Projects Completed</p>
               </div>
               <div>
-                <h3 className="text-2xl sm:text-3xl font-bold text-black dark:text-white mb-1 transition-colors duration-300">10+</h3>
+                <h3 className="text-2xl sm:text-3xl font-bold text-black dark:text-white mb-1 transition-colors duration-300">{hero?.totalToolsAndTech || 0}+</h3>
                 <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 transition-colors duration-300">Tools & Tech</p>
               </div>
             </motion.div>
 
             {/* Buttons */}
             <motion.div variants={itemVariants} className="flex flex-wrap gap-3 mb-6 pointer-events-auto">
-              <button className="px-5 py-2.5 text-sm bg-gradient-to-r from-blue-500 to-emerald-400 hover:from-blue-600 hover:to-emerald-500 text-white font-medium rounded-lg flex items-center gap-2 transition-all shadow-lg shadow-emerald-500/20 cursor-pointer">
+              <a href="#about" className="px-5 py-2.5 text-sm bg-gradient-to-r from-blue-500 to-emerald-400 hover:from-blue-600 hover:to-emerald-500 text-white font-medium rounded-lg flex items-center gap-2 transition-all shadow-lg shadow-emerald-500/20 cursor-pointer">
                 More About Me
                 <ExternalLink className="w-3.5 h-3.5" />
-              </button>
-              <button className="px-5 py-2.5 text-sm bg-gray-100 dark:bg-[#1A1C23] hover:bg-gray-200 dark:hover:bg-[#252833] text-black dark:text-white font-medium rounded-lg flex items-center gap-2 transition-colors border border-gray-200 dark:border-white/5 cursor-pointer">
-                Join the forum
+              </a>
+              <a href="#contact" className="px-5 py-2.5 text-sm bg-gray-100 dark:bg-[#1A1C23] hover:bg-gray-200 dark:hover:bg-[#252833] text-black dark:text-white font-medium rounded-lg flex items-center gap-2 transition-colors border border-gray-200 dark:border-white/5 cursor-pointer">
+                Contact Me
                 <Users className="w-3.5 h-3.5" />
-              </button>
-              <button className="px-5 py-2.5 text-sm bg-transparent hover:bg-black/5 dark:hover:bg-white/5 text-black dark:text-white font-medium rounded-lg flex items-center gap-2 transition-colors border border-black/10 dark:border-white/10 cursor-pointer">
-                Download Resume
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
+              </a>
+              {hero?.resumeUrl && (
+                <a href={hero.resumeUrl} target="_blank" rel="noreferrer" className="px-5 py-2.5 text-sm bg-transparent hover:bg-black/5 dark:hover:bg-white/5 text-black dark:text-white font-medium rounded-lg flex items-center gap-2 transition-colors border border-black/10 dark:border-white/10 cursor-pointer">
+                  Download Resume
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </a>
+              )}
             </motion.div>
 
             {/* Social Links */}
