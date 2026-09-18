@@ -21,10 +21,16 @@ export default function SeoSettingsDashboard() {
 
   useEffect(() => {
     if (seoData) {
-      setValue("title", seoData.title);
-      setValue("description", seoData.description);
-      setValue("keywords", seoData.keywords);
+      setValue("siteName", seoData.siteName);
+      setValue("metaTitle", seoData.metaTitle);
+      setValue("metaDescription", seoData.metaDescription);
+      setValue("metaKeywords", (seoData.metaKeywords || []).join(', ') as any);
+      setValue("author", seoData.author);
+      setValue("favicon", seoData.favicon);
+      setValue("ogTitle", seoData.ogTitle);
+      setValue("ogDescription", seoData.ogDescription);
       setValue("ogImage", seoData.ogImage);
+      setValue("twitterCard", seoData.twitterCard);
     }
   }, [seoData, setValue]);
 
@@ -43,7 +49,11 @@ export default function SeoSettingsDashboard() {
   });
 
   const onSubmit = (formData: CreateSeoSettingDto) => {
-    updateMutation.mutate(formData);
+    const payload = {
+      ...formData,
+      metaKeywords: (formData.metaKeywords as unknown as string).split(',').map(s => s.trim()).filter(Boolean)
+    };
+    updateMutation.mutate(payload as CreateSeoSettingDto);
   };
 
   if (isLoading) {
@@ -63,10 +73,29 @@ export default function SeoSettingsDashboard() {
 
       <div className="bg-white dark:bg-[#1A1C23] border border-gray-200 dark:border-white/10 rounded-2xl p-6 md:p-8 shadow-sm">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Site Name</label>
+              <input 
+                {...register("siteName")} 
+                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" 
+                placeholder="E.g., Abass Portfolio"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Author</label>
+              <input 
+                {...register("author")} 
+                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" 
+                placeholder="E.g., Abass Alzouma"
+              />
+            </div>
+          </div>
+
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Global Title</label>
             <input 
-              {...register("title", { required: true })} 
+              {...register("metaTitle", { required: true })} 
               className="w-full px-4 py-2.5 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" 
               placeholder="E.g., Abass Alzouma | Full Stack Developer"
             />
@@ -75,7 +104,7 @@ export default function SeoSettingsDashboard() {
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Global Meta Description</label>
             <textarea 
-              {...register("description", { required: true })} 
+              {...register("metaDescription", { required: true })} 
               rows={3} 
               className="w-full px-4 py-2.5 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500"
               placeholder="A brief description of your portfolio for search engines..."
@@ -83,28 +112,76 @@ export default function SeoSettingsDashboard() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Meta Keywords</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Meta Keywords (Comma separated)</label>
             <textarea 
-              {...register("keywords", { required: true })} 
+              {...register("metaKeywords", { required: true })} 
               rows={2} 
               className="w-full px-4 py-2.5 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500"
               placeholder="react, nextjs, full stack developer, portfolio..."
             />
           </div>
 
+          <div className="space-y-2 pt-4 border-t border-gray-200 dark:border-white/10">
+            <h3 className="text-lg font-medium text-black dark:text-white">Open Graph (Social Media)</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Settings for how your site appears when shared on social platforms.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">OG Title</label>
+              <input 
+                {...register("ogTitle")} 
+                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" 
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Twitter Card Type</label>
+              <input 
+                {...register("twitterCard")} 
+                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" 
+                placeholder="summary_large_image"
+              />
+            </div>
+          </div>
+
           <div className="space-y-2">
-            <Controller
-              name="ogImage"
-              control={control}
-              render={({ field }) => (
-                <FileUpload
-                  value={field.value}
-                  onChange={field.onChange}
-                  accept="image/*"
-                  label="Open Graph Image URL (OG Image)"
-                />
-              )}
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">OG Description</label>
+            <textarea 
+              {...register("ogDescription")} 
+              rows={2} 
+              className="w-full px-4 py-2.5 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500"
             />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Controller
+                name="ogImage"
+                control={control}
+                render={({ field }) => (
+                  <FileUpload
+                    value={field.value}
+                    onChange={field.onChange}
+                    accept="image/*"
+                    label="OG Image URL"
+                  />
+                )}
+              />
+            </div>
+            <div className="space-y-2">
+              <Controller
+                name="favicon"
+                control={control}
+                render={({ field }) => (
+                  <FileUpload
+                    value={field.value}
+                    onChange={field.onChange}
+                    accept="image/*"
+                    label="Favicon URL"
+                  />
+                )}
+              />
+            </div>
           </div>
 
           <div className="pt-4 flex justify-end border-t border-gray-200 dark:border-white/10">

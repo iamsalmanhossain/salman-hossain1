@@ -5,13 +5,22 @@ import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { motion, Variants, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { SkillService } from "@/services/skill.service";
 
 const TechSphere: React.FC = () => {
   const mountRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
+
+  const { data: skillsData, isLoading } = useQuery({
+    queryKey: ['skills'],
+    queryFn: () => SkillService.getSkills(),
+  });
+
+  const apiSkills = skillsData?.data || [];
 
   useEffect(() => {
     setMounted(true);
@@ -73,23 +82,14 @@ const TechSphere: React.FC = () => {
     scene.add(directionalLight);
 
     // ৪. টেকনোলজি আইটেম তালিকা
-    const techItems = [
-      { name: "K8s", symbol: "☸", color: "#326ce5" },
-      { name: "Terraform", symbol: "⬡", color: "#844fba" },
-      { name: "Kotlin", symbol: "◆", color: "#a97bff" },
-      { name: "MySQL", symbol: "🐬", color: "#00758f" },
-      { name: "Firebase", symbol: "🔥", color: "#ffca28" },
-      { name: "Linux", symbol: "🐧", color: isLight ? "#000000" : "#ffffff" },
-      { name: "GCP", symbol: "☁", color: "#4285f4" },
-      { name: "Android", symbol: "🤖", color: "#78c257" },
-      { name: "Bash", symbol: ">_", color: "#4eaa25" },
-      { name: "Azure", symbol: "▲", color: "#0089d6" },
-      { name: "GraphQL", symbol: "⬢", color: "#e535ab" },
-      { name: "Figma", symbol: "❖", color: "#f24e1e" },
-      { name: "Rust", symbol: "⚙", color: "#dea584" },
-      { name: "C++", symbol: "C++", color: "#00599c" },
-      { name: "Three.js", symbol: "▲", color: "#049ef4" },
-      { name: "Prisma", symbol: "◭", color: "#2d3748" },
+    const colors = ["#326ce5", "#844fba", "#a97bff", "#00758f", "#ffca28", "#4285f4", "#78c257", "#e535ab", "#dea584", "#0089d6"];
+    const visibleSkills = apiSkills.filter(s => s.showIn3d !== false);
+    const techItems = visibleSkills.length > 0 ? visibleSkills.map((s, idx) => ({
+      name: s.name,
+      symbol: s.icon || '📌',
+      color: colors[idx % colors.length]
+    })) : [
+      { name: "No Skills", symbol: "∅", color: "#a97bff" }
     ];
 
     // ক্যানভাসে আইকন + টেক্সট ড্র করে স্প্রাইট তৈরি করার ফাংশন
@@ -99,18 +99,6 @@ const TechSphere: React.FC = () => {
       canvas.height = 256;
       const ctx = canvas.getContext("2d");
 
-      if (ctx) {
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillStyle = item.color;
-        ctx.font = "bold 85px sans-serif";
-        ctx.fillText(item.symbol, 128, 100);
-
-        ctx.fillStyle = isLight ? "#1a202c" : "#cfd8dc";
-        ctx.font = "bold 26px monospace";
-        ctx.fillText(item.name, 128, 185);
-      }
-
       const texture = new THREE.CanvasTexture(canvas);
       const spriteMat = new THREE.SpriteMaterial({
         map: texture,
@@ -118,6 +106,45 @@ const TechSphere: React.FC = () => {
       });
       const sprite = new THREE.Sprite(spriteMat);
       sprite.scale.set(3.2, 3.2, 1);
+
+      if (ctx) {
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = isLight ? "#1a202c" : "#cfd8dc";
+        ctx.font = "bold 26px monospace";
+        ctx.fillText(item.name, 128, 200);
+
+        if (item.symbol.startsWith('http')) {
+          const img = new window.Image();
+          img.crossOrigin = "anonymous";
+          
+          img.onload = () => {
+            // Draw image scaled down
+            ctx.drawImage(img, 78, 40, 100, 100);
+            texture.needsUpdate = true;
+          };
+          img.onerror = () => {
+            // Fallback to first letter if image fails to load
+            ctx.fillStyle = item.color;
+            ctx.font = "bold 85px sans-serif";
+            ctx.fillText(item.name.charAt(0) || "📌", 128, 100);
+            texture.needsUpdate = true;
+          };
+
+          // Add a dummy query string to bypass browser cache for CORS
+          const srcUrl = new URL(item.symbol);
+          srcUrl.searchParams.set("cors", "1");
+          img.src = srcUrl.toString();
+        } else {
+          ctx.fillStyle = item.color;
+          ctx.font = "bold 85px sans-serif";
+          // Check if symbol is a long broken string
+          const displaySymbol = item.symbol.length > 2 && !item.symbol.includes('️') ? item.name.charAt(0) : item.symbol;
+          ctx.fillText(displaySymbol, 128, 100);
+          texture.needsUpdate = true;
+        }
+      }
+
       return sprite;
     };
 
@@ -166,47 +193,38 @@ const TechSphere: React.FC = () => {
       renderer.dispose();
       scene.clear();
     };
-  }, [theme, mounted]);
+  }, [theme, mounted, apiSkills]);
 
   const skillCategories = [
     {
       title: "Frontend Development",
-      skills: [
-        { name: "React / Next.js", icon: "⚛️" },
-        { name: "Three.js", icon: "▲" },
-        { name: "Tailwind CSS", icon: "🎨" },
-        { name: "Framer Motion", icon: "✨" },
-      ]
+      skills: apiSkills.filter(s => s.category === 'FRONTEND').map(s => ({ name: s.name, icon: s.icon || '⚛️' }))
     },
     {
-      title: "Backend & Database",
-      skills: [
-        { name: "Node.js", icon: "🟢" },
-        { name: "MySQL", icon: "🐬" },
-        { name: "Firebase", icon: "🔥" },
-        { name: "Prisma", icon: "◭" },
-        { name: "GraphQL", icon: "⬢" },
-      ]
+      title: "Backend Development",
+      skills: apiSkills.filter(s => s.category === 'BACKEND').map(s => ({ name: s.name, icon: s.icon || '🟢' }))
+    },
+    {
+      title: "Database",
+      skills: apiSkills.filter(s => s.category === 'DATABASE').map(s => ({ name: s.name, icon: s.icon || '🐬' }))
     },
     {
       title: "DevOps & Cloud",
-      skills: [
-        { name: "Kubernetes", icon: "☸" },
-        { name: "Terraform", icon: "⬡" },
-        { name: "Linux / Bash", icon: "🐧" },
-        { name: "GCP / Azure", icon: "☁" },
-        { name: "Git", icon: "📦" },
-      ]
+      skills: apiSkills.filter(s => s.category === 'DEVOPS').map(s => ({ name: s.name, icon: s.icon || '☁' }))
     },
     {
-      title: "Languages",
-      skills: [
-        { name: "C++", icon: "C++" },
-        { name: "Rust", icon: "⚙" },
-        { name: "Kotlin", icon: "◆" },
-      ]
+      title: "Tools & Languages",
+      skills: apiSkills.filter(s => s.category === 'TOOL').map(s => ({ name: s.name, icon: s.icon || '⚙️' }))
     }
-  ];
+  ].filter(category => category.skills.length > 0);
+
+  // Fallback if no skills are found at all
+  if (skillCategories.length === 0) {
+    skillCategories.push({
+      title: "No Skills Added",
+      skills: [{ name: "Please add skills in dashboard", icon: "⚠️" }]
+    });
+  }
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -229,7 +247,7 @@ const TechSphere: React.FC = () => {
           <h2 className="text-3xl sm:text-4xl font-bold text-black dark:text-white">
             Technical Skills
           </h2>
-          <div className="w-16 h-1 bg-gradient-to-r from-blue-500 to-emerald-400 rounded-full" />
+          <div className="w-16 h-1 bg-black dark:bg-white rounded-full" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
@@ -254,7 +272,7 @@ const TechSphere: React.FC = () => {
           <div className="order-1 lg:order-2 flex flex-col items-center justify-center w-full relative">
             
             {/* Title */}
-            <h3 className="text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-emerald-400 text-center uppercase tracking-widest mb-6">
+            <h3 className="text-xl sm:text-2xl font-bold text-black dark:text-white text-center uppercase tracking-widest mb-6">
               {skillCategories[activeIndex].title}
             </h3>
 
@@ -285,7 +303,9 @@ const TechSphere: React.FC = () => {
                       >
                         {/* Logo Box */}
                         <div className="flex-shrink-0 w-[56px] min-w-[56px] max-w-[56px] h-[56px] min-h-[56px] max-h-[56px] sm:w-[64px] sm:min-w-[64px] sm:max-w-[64px] sm:h-[64px] sm:min-h-[64px] sm:max-h-[64px] flex items-center justify-center bg-white dark:bg-[#0E1015] rounded-xl border border-gray-200 dark:border-white/10 shadow-sm transition-all group-hover:border-emerald-500/50">
-                          {skill.icon.length > 2 && !skill.icon.includes('️') ? (
+                          {skill.icon.startsWith('http') ? (
+                             <img src={skill.icon} alt={skill.name} className="w-8 h-8 sm:w-10 sm:h-10 object-contain group-hover:scale-110 transition-transform" />
+                          ) : skill.icon.length > 2 && !skill.icon.includes('️') ? (
                              <span className="text-xs font-bold text-gray-500 dark:text-gray-400 group-hover:text-emerald-500 transition-colors">{skill.icon}</span>
                           ) : (
                              <span className="text-2xl sm:text-3xl group-hover:scale-110 transition-transform">{skill.icon}</span>

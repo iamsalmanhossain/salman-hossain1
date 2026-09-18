@@ -1,6 +1,8 @@
 "use client";
 
-import { useQueries } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
+import { AdminPortfolioService } from "@/services/adminPortfolio.service";
 import { HeroSectionService } from "@/services/heroSection.service";
 import { ProjectService } from "@/services/project.service";
 import { ExperienceService } from "@/services/experience.service";
@@ -19,12 +21,15 @@ import Contact from "../components/Contact";
 import Footer from "../components/Footer";
 import GlowCursor from "../components/GlowCursor";
 import { useTheme } from "next-themes";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function Home() {
+function HomeContent() {
   const { theme } = useTheme();
+  const searchParams = useSearchParams();
+  const previewTemplateId = searchParams.get("previewTemplateId");
+
   const [mounted, setMounted] = useState(false);
   const [loadingComplete, setLoadingComplete] = useState(false);
 
@@ -32,7 +37,23 @@ export default function Home() {
     setLoadingComplete(true);
   }, []);
 
-  // We can prefetch or parallel fetch the important data for the homepage here
+  // Fetch the active template or preview template
+  const { data: templatesData, isLoading: isLoadingTemplates } = useQuery({
+    queryKey: ['adminPortfolios'],
+    queryFn: () => AdminPortfolioService.getAllTemplates(),
+  });
+
+  const activeTemplate = previewTemplateId 
+    ? templatesData?.data?.find((t) => t.id === previewTemplateId)
+    : templatesData?.data?.find((t) => t.isActive);
+
+  const websiteData = activeTemplate?.websiteData || {
+    showHero: true,
+    showAbout: true,
+    showProjects: true,
+    showBlog: true,
+  };
+
   const queries = useQueries({
     queries: [
       { queryKey: ['hero'], queryFn: () => HeroSectionService.getHeroSection() },
@@ -42,7 +63,7 @@ export default function Home() {
     ]
   });
 
-  const isLoadingData = queries.some(q => q.isLoading);
+  const isLoadingData = queries.some(q => q.isLoading) || isLoadingTemplates;
 
   useEffect(() => {
     setMounted(true);
@@ -100,17 +121,28 @@ export default function Home() {
                 variant="square"
               />
             </div>
-            <Hero />
-            <About />
+            
+            {/* Dynamic sections based on template data */}
+            {websiteData.showHero !== false && <Hero />}
+            {websiteData.showAbout !== false && <About />}
             <TechSphere />
             <Experience />
-            <Projects />
-            <Blog />
+            {websiteData.showProjects !== false && <Projects />}
+            {websiteData.showBlog !== false && <Blog />}
             <Contact />
             <Footer />
+            
           </GlowCursor>
         </motion.div>
       )}
     </>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-[#0A0A0A]" />}>
+      <HomeContent />
+    </Suspense>
   );
 }

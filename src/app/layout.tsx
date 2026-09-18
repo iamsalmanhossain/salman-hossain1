@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
+import { Poppins, Geist } from "next/font/google";
 import "./globals.css";
 import AppProvider from "@/components/AppProvider";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const poppins = Poppins({
   weight: ['300', '400', '500', '600', '700'],
@@ -23,9 +26,12 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${poppins.variable} font-sans antialiased`}
+      className={cn("antialiased", poppins.variable, "font-sans", geist.variable)}
     >
-      <body className="flex flex-col md:flex-row bg-white text-black dark:bg-[#0A0A0A] dark:text-white transition-colors duration-300">
+      <body 
+        className="flex flex-col md:flex-row bg-white text-black dark:bg-[#0A0A0A] dark:text-white transition-colors duration-300"
+        suppressHydrationWarning
+      >
         <AppProvider>
           {children}
         </AppProvider>

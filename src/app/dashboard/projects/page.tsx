@@ -48,9 +48,19 @@ export default function ProjectsDashboard() {
       setValue("title", project.title);
       setValue("description", project.description);
       setValue("content", project.content);
-      setValue("githubUrl", project.githubUrl);
+      setValue("githubFrontendUrl", project.githubFrontendUrl);
+      setValue("githubBackendUrl", project.githubBackendUrl);
       setValue("liveUrl", project.liveUrl);
-      setValue("technologies", project.technologies);
+      setValue("videoUrl", project.videoUrl);
+      setValue("technologies", project.technologies?.join(', ') as any);
+      setValue("features", project.features?.join(', ') as any);
+      setValue("thumbnails", project.thumbnails?.join(', ') as any);
+      setValue("tags", project.tags?.join(', ') as any);
+      setValue("role", project.role);
+      setValue("startDate", project.startDate ? project.startDate.split('T')[0] : "");
+      setValue("endDate", project.endDate ? project.endDate.split('T')[0] : "");
+      setValue("status", project.status);
+      setValue("categoryId", project.categoryId);
       setValue("featured", project.featured);
     } else {
       setEditingId(null);
@@ -58,9 +68,16 @@ export default function ProjectsDashboard() {
         title: "",
         description: "",
         content: "",
-        githubUrl: "",
+        githubFrontendUrl: "",
+        githubBackendUrl: "",
         liveUrl: "",
+        videoUrl: "",
         technologies: [],
+        features: [],
+        thumbnails: [],
+        tags: [],
+        role: "",
+        status: "DRAFT" as any,
         featured: false
       });
     }
@@ -74,13 +91,32 @@ export default function ProjectsDashboard() {
   };
 
   const onSubmit = (formData: CreateProjectDto) => {
-    // Ensure technologies is an array
     const dataToSubmit = {
       ...formData,
       technologies: typeof formData.technologies === 'string' 
-        ? (formData.technologies as string).split(',').map(t => t.trim())
-        : formData.technologies
+        ? (formData.technologies as string).split(',').map(t => t.trim()).filter(Boolean)
+        : formData.technologies,
+      features: typeof formData.features === 'string'
+        ? (formData.features as string).split(',').map(t => t.trim()).filter(Boolean)
+        : formData.features,
+      thumbnails: typeof formData.thumbnails === 'string'
+        ? (formData.thumbnails as string).split(',').map(t => t.trim()).filter(Boolean)
+        : formData.thumbnails,
+      tags: typeof formData.tags === 'string'
+        ? (formData.tags as string).split(',').map(t => t.trim()).filter(Boolean)
+        : formData.tags,
     };
+
+    if (dataToSubmit.startDate) {
+      dataToSubmit.startDate = new Date(dataToSubmit.startDate).toISOString();
+    } else {
+      delete dataToSubmit.startDate;
+    }
+    if (dataToSubmit.endDate) {
+      dataToSubmit.endDate = new Date(dataToSubmit.endDate).toISOString();
+    } else {
+      delete dataToSubmit.endDate;
+    }
 
     if (editingId) {
       updateMutation.mutate({ id: editingId, data: dataToSubmit });
@@ -131,8 +167,8 @@ export default function ProjectsDashboard() {
                           <ExternalLink className="w-3 h-3" /> Live
                         </a>
                       )}
-                      {project.githubUrl && (
-                        <a href={project.githubUrl} target="_blank" rel="noreferrer" className="text-xs text-gray-500 dark:text-gray-400 hover:underline flex items-center gap-1">
+                      {project.githubFrontendUrl && (
+                        <a href={project.githubFrontendUrl} target="_blank" rel="noreferrer" className="text-xs text-gray-500 dark:text-gray-400 hover:underline flex items-center gap-1">
                           <Code className="w-3 h-3" /> GitHub
                         </a>
                       )}
@@ -232,12 +268,68 @@ export default function ProjectsDashboard() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">GitHub URL</label>
-                    <input {...register("githubUrl")} type="url" className="w-full px-4 py-2 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" />
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">GitHub Frontend URL</label>
+                    <input {...register("githubFrontendUrl")} type="url" className="w-full px-4 py-2 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" />
                   </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">GitHub Backend URL</label>
+                    <input {...register("githubBackendUrl")} type="url" className="w-full px-4 py-2 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Live URL</label>
                     <input {...register("liveUrl")} type="url" className="w-full px-4 py-2 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Video URL</label>
+                    <input {...register("videoUrl")} type="url" className="w-full px-4 py-2 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Features (comma separated)</label>
+                  <textarea {...register("features")} rows={2} className="w-full px-4 py-2 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" />
+                </div>
+                
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Tags (comma separated)</label>
+                  <input {...register("tags")} className="w-full px-4 py-2 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Thumbnails (URLs, comma separated)</label>
+                  <input {...register("thumbnails")} className="w-full px-4 py-2 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Role</label>
+                    <input {...register("role")} className="w-full px-4 py-2 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+                    <select {...register("status")} className="w-full px-4 py-2 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500">
+                      <option value="DRAFT">DRAFT</option>
+                      <option value="PUBLISHED">PUBLISHED</option>
+                      <option value="ARCHIVED">ARCHIVED</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Start Date</label>
+                    <input {...register("startDate")} type="date" className="w-full px-4 py-2 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">End Date</label>
+                    <input {...register("endDate")} type="date" className="w-full px-4 py-2 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Category ID</label>
+                    <input {...register("categoryId")} className="w-full px-4 py-2 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" />
                   </div>
                 </div>
 

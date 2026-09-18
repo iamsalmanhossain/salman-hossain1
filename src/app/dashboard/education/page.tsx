@@ -46,22 +46,20 @@ export default function EducationDashboard() {
     if (education) {
       setEditingId(education.id);
       setValue("degree", education.degree);
-      setValue("institution", education.institution);
-      setValue("fieldOfStudy", education.fieldOfStudy);
-      setValue("startDate", new Date(education.startDate).toISOString().split('T')[0]);
-      if (education.endDate) {
-        setValue("endDate", new Date(education.endDate).toISOString().split('T')[0]);
+      setValue("institute", education.institute);
+      setValue("field", education.field);
+      setValue("startYear", education.startYear);
+      if (education.endYear) {
+        setValue("endYear", education.endYear);
       }
-      setValue("description", education.description);
     } else {
       setEditingId(null);
       reset({
         degree: "",
-        institution: "",
-        fieldOfStudy: "",
-        startDate: "",
-        endDate: "",
-        description: "",
+        institute: "",
+        field: "",
+        startYear: new Date().getFullYear(),
+        endYear: undefined,
       });
     }
     setIsModalOpen(true);
@@ -74,11 +72,10 @@ export default function EducationDashboard() {
   };
 
   const onSubmit = (formData: CreateEducationDto) => {
-    // If endDate is empty string, make it undefined
     const dataToSubmit = {
       ...formData,
-      endDate: formData.endDate ? new Date(formData.endDate).toISOString() : undefined,
-      startDate: new Date(formData.startDate).toISOString()
+      startYear: Number(formData.startYear),
+      endYear: formData.endYear ? Number(formData.endYear) : undefined,
     };
 
     if (editingId) {
@@ -124,14 +121,14 @@ export default function EducationDashboard() {
                 <tr key={education.id} className="border-b border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
                   <td className="p-4">
                     <p className="font-semibold text-black dark:text-white">{education.degree}</p>
-                    <p className="text-sm text-gray-500">{education.fieldOfStudy}</p>
+                    <p className="text-sm text-gray-500">{education.field}</p>
                   </td>
                   <td className="p-4">
-                    <p className="font-medium text-gray-700 dark:text-gray-300">{education.institution}</p>
+                    <p className="font-medium text-gray-700 dark:text-gray-300">{education.institute}</p>
                   </td>
                   <td className="p-4">
                     <span className="text-sm text-gray-600 dark:text-gray-400">
-                      {new Date(education.startDate).getFullYear()} - {education.endDate ? new Date(education.endDate).getFullYear() : 'Present'}
+                      {education.startYear} - {education.endYear ? education.endYear : 'Present'}
                     </span>
                   </td>
                   <td className="p-4 text-right">
@@ -192,29 +189,26 @@ export default function EducationDashboard() {
 
                 <div className="space-y-1">
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Field of Study</label>
-                  <input {...register("fieldOfStudy", { required: true })} className="w-full px-4 py-2 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" placeholder="E.g., Computer Science" />
+                  <input {...register("field", { required: true })} className="w-full px-4 py-2 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" placeholder="E.g., Computer Science" />
                 </div>
 
                 <div className="space-y-1">
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Institution</label>
-                  <input {...register("institution", { required: true })} className="w-full px-4 py-2 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" placeholder="E.g., MIT" />
+                  <input {...register("institute", { required: true })} className="w-full px-4 py-2 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" placeholder="E.g., MIT" />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Start Date</label>
-                    <input {...register("startDate", { required: true })} type="date" className="w-full px-4 py-2 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500 text-black dark:text-white" />
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Start Year</label>
+                    <input {...register("startYear", { required: true, valueAsNumber: true })} type="number" min="1900" max={new Date().getFullYear() + 10} className="w-full px-4 py-2 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500 text-black dark:text-white" placeholder="2018" />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">End Date (Leave blank if present)</label>
-                    <input {...register("endDate")} type="date" className="w-full px-4 py-2 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500 text-black dark:text-white" />
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">End Year (Leave blank if present)</label>
+                    <input {...register("endYear", { valueAsNumber: true })} type="number" min="1900" max={new Date().getFullYear() + 10} className="w-full px-4 py-2 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500 text-black dark:text-white" placeholder="2022" />
                   </div>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Description (optional)</label>
-                  <textarea {...register("description")} rows={3} className="w-full px-4 py-2 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" placeholder="Describe your achievements..." />
-                </div>
+
               </form>
             </div>
 

@@ -1,9 +1,13 @@
+
+
 export interface Testimonial {
   id: string;
-  clientName: string;
+  name: string;
   designation?: string;
-  message: string;
-  avatar?: string;
+  company?: string;
+  image?: string;
+  review: string;
+  featured: boolean;
   createdAt: string;
   updatedAt: string;
 }

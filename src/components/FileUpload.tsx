@@ -44,8 +44,8 @@ export default function FileUpload({
 
       const response = await UploadService.uploadFile(file);
       
-      if (response && response.data && response.data.url) {
-        onChange(response.data.url);
+      if (response && response.data && Array.isArray(response.data) && response.data.length > 0) {
+        onChange(response.data[0].url);
       } else {
         throw new Error('Invalid response from server');
       }
