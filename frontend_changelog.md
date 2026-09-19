@@ -41,3 +41,4 @@
 - **03:42 AM**: Refactor data fetching in blogs
 - **03:43 AM**: Update SVG icons to match new design
 - **03:46 AM**: Adjust responsive behavior in skills page
+- **04:01 AM**: Optimize image loading in blogs section
