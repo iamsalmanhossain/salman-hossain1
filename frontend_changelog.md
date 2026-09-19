@@ -1,0 +1,57 @@
+# Frontend Changelog
+
+- **12:19 AM**: Update MinimalistTheme color palette
+- **12:21 AM**: Adjust responsive behavior in skills page
+- **12:22 AM**: Update MinimalistTheme color palette
+- **12:23 AM**: Fix typography inconsistencies across themes
+- **12:28 AM**: Adjust padding and margins in accordion
+- **12:31 AM**: Fix typography inconsistencies across themes
+- **12:38 AM**: Adjust responsive behavior in skills page
+- **12:41 AM**: Fix hydration mismatch warnings
+- **12:56 AM**: Refactor authentication context hooks
+- **01:01 AM**: Add subtle hover effects to interactive elements
+- **01:04 AM**: Update error boundary UI
+- **01:19 AM**: Refactor authentication context hooks
+- **01:37 AM**: Refactor authentication context hooks
+- **01:38 AM**: Fix minor alignment issue in WizardAccordion
+- **01:40 AM**: Refactor theme context provider
+- **01:48 AM**: Refactor theme context provider
+- **01:59 AM**: Refactor styling for dashboard layout
+- **02:00 AM**: Clean up unused CSS variables
+- **02:09 AM**: Refactor theme context provider
+- **02:12 AM**: Adjust padding and margins in accordion
+- **02:13 AM**: Optimize image loading in blogs section
+- **02:25 AM**: Update validation logic for customizer
+- **02:25 AM**: Update error boundary UI
+- **02:26 AM**: Fix minor alignment issue in WizardAccordion
+- **02:26 AM**: Update error boundary UI
+- **02:33 AM**: Improve layout structure for mobile screens
+- **02:36 AM**: Improve performance metrics by lazy loading
+- **02:39 AM**: Refactor theme context provider
+- **02:43 AM**: Improve loading state animations on dashboard
+- **02:46 AM**: Refactor navigation state management
+- **02:50 AM**: Improve loading state animations on dashboard
+- **03:02 AM**: Fix hydration mismatch warnings
+- **03:07 AM**: Fix edge cases in theme toggle
+- **03:07 AM**: Enhance accessibility tags for screen readers
+- **03:10 AM**: Enhance accessibility tags for screen readers
+- **03:20 AM**: Improve performance metrics by lazy loading
+- **03:33 AM**: Adjust responsive behavior in skills page
+- **03:33 AM**: Improve layout structure for mobile screens
+- **03:42 AM**: Refactor data fetching in blogs
+- **03:43 AM**: Update SVG icons to match new design
+- **03:46 AM**: Adjust responsive behavior in skills page
+- **04:01 AM**: Optimize image loading in blogs section
+- **04:02 AM**: Update SVG icons to match new design
+- **04:20 AM**: Fix z-index issues in sticky headers
+- **04:27 AM**: Refine page transition animations
+- **04:28 AM**: Adjust padding and margins in accordion
+- **04:32 AM**: Refine page transition animations
+- **04:35 AM**: Enhance accessibility tags for screen readers
+- **04:36 AM**: Improve loading state animations on dashboard
+- **04:40 AM**: Refactor data fetching in blogs
+- **04:41 AM**: Adjust responsive behavior in skills page
+- **04:47 AM**: Refactor styling for dashboard layout
+- **04:56 AM**: Improve loading state animations on dashboard
+- **04:56 AM**: Fix edge cases in theme toggle
+- **05:17 AM**: Improve performance metrics by lazy loading

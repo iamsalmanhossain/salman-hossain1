@@ -7,8 +7,9 @@ import { Loader2, Save } from "lucide-react";
 import { CreateSeoSettingDto } from "@/types/seoSetting";
 import { useForm, Controller } from "react-hook-form";
 import FileUpload from "@/components/FileUpload";
+import { toast } from "sonner";
 
-export default function SeoSettingsDashboard() {
+export default function SeoSettingsDashboard({ hideHeader, onNext }: { hideHeader?: boolean, onNext?: () => void }) {
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
@@ -44,7 +45,8 @@ export default function SeoSettingsDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["seoSetting"] });
-      alert("SEO Settings updated successfully!");
+      toast.success("SEO Settings updated successfully!");
+      if (onNext) onNext();
     },
   });
 
@@ -65,13 +67,15 @@ export default function SeoSettingsDashboard() {
   }
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
-      <div>
-        <h2 className="text-2xl font-bold text-black dark:text-white">SEO Settings</h2>
-        <p className="text-gray-500 dark:text-gray-400">Manage global meta tags and SEO configurations for your portfolio</p>
-      </div>
+    <div className={`space-y-6 mx-auto ${hideHeader ? 'max-w-full' : 'max-w-4xl'}`}>
+      {!hideHeader && (
+        <div>
+          <h2 className="text-2xl font-bold text-black dark:text-white">SEO Settings</h2>
+          <p className="text-gray-500 dark:text-gray-400">Manage global meta tags and SEO configurations for your portfolio</p>
+        </div>
+      )}
 
-      <div className="bg-white dark:bg-[#1A1C23] border border-gray-200 dark:border-white/10 rounded-2xl p-6 md:p-8 shadow-sm">
+      <div className={`bg-white dark:bg-[#1A1C23] border border-gray-200 dark:border-white/10 rounded-2xl ${hideHeader ? 'p-0 border-0 shadow-none' : 'p-6 md:p-8 shadow-sm'}`}>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
@@ -184,7 +188,7 @@ export default function SeoSettingsDashboard() {
             </div>
           </div>
 
-          <div className="pt-4 flex justify-end border-t border-gray-200 dark:border-white/10">
+          <div className="pt-4 flex justify-end gap-3 border-t border-gray-200 dark:border-white/10">
             <button 
               type="submit"
               disabled={updateMutation.isPending}
@@ -195,7 +199,7 @@ export default function SeoSettingsDashboard() {
               ) : (
                 <Save className="w-5 h-5" />
               )}
-              {seoData ? "Save Settings" : "Create Settings"}
+              {hideHeader ? "Save & Next" : "Save Settings"}
             </button>
           </div>
         </form>

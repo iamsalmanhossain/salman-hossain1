@@ -36,6 +36,8 @@ export default function LoginPage() {
       const res = await AuthService.login(data);
       if (res.success && res.data?.accessToken) {
         setAccessToken(res.data.accessToken);
+        // proxy.ts (middleware) যেন টোকেনটি পড়তে পারে তার জন্য কুকিতে সেভ করা হচ্ছে
+        document.cookie = `token=${res.data.accessToken}; path=/; max-age=604800; SameSite=Lax`; 
         router.push("/dashboard");
       } else {
         setError(res.message || "Failed to login. Please try again.");

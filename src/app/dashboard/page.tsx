@@ -1,14 +1,33 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { FolderGit2, Briefcase, FileText, Eye, TrendingUp } from "lucide-react";
+import { FolderGit2, Briefcase, FileText, Eye, TrendingUp, MessageSquare, Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { DashboardService } from "@/services/dashboard.service";
 
 export default function DashboardOverview() {
+  const { data: statsRes, isLoading: isLoadingStats } = useQuery({
+    queryKey: ['dashboardStats'],
+    queryFn: () => DashboardService.getStats()
+  });
+
+  const { data: activitiesRes, isLoading: isLoadingActivities } = useQuery({
+    queryKey: ['dashboardActivities'],
+    queryFn: () => DashboardService.getActivities()
+  });
+
+  if (isLoadingStats || isLoadingActivities) {
+    return <div className="h-[80vh] flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-blue-500" /></div>;
+  }
+
+  const s = statsRes?.data;
+  const activities = activitiesRes?.data || [];
+
   const stats = [
-    { label: "Total Projects", value: "12", icon: FolderGit2, color: "text-blue-500", bg: "bg-blue-500/10" },
-    { label: "Experience Years", value: "8+", icon: Briefcase, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-    { label: "Blog Posts", value: "24", icon: FileText, color: "text-purple-500", bg: "bg-purple-500/10" },
-    { label: "Profile Views", value: "1.2k", icon: Eye, color: "text-orange-500", bg: "bg-orange-500/10" },
+    { label: "Total Views", value: s?.totalViews || 0, icon: Eye, color: "text-blue-500", bg: "bg-blue-500/10" },
+    { label: "Active Visitors", value: s?.activeVisitors || 0, icon: TrendingUp, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+    { label: "Total Projects", value: s?.totalProjects || 0, icon: FolderGit2, color: "text-purple-500", bg: "bg-purple-500/10" },
+    { label: "Total Messages", value: s?.totalMessages || 0, icon: MessageSquare, color: "text-orange-500", bg: "bg-orange-500/10" },
   ];
 
   return (
@@ -58,18 +77,20 @@ export default function DashboardOverview() {
           <h3 className="text-lg font-bold text-black dark:text-white mb-6">Recent Activity</h3>
           
           <div className="space-y-6">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="flex gap-4">
+            {activities.length > 0 ? activities.map((activity, index) => (
+              <div key={activity.id} className="flex gap-4">
                 <div className="relative mt-1">
                   <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-                  {i !== 4 && <div className="absolute top-3 left-1/2 -translate-x-1/2 w-[2px] h-10 bg-gray-200 dark:bg-white/10" />}
+                  {index !== activities.length - 1 && <div className="absolute top-3 left-1/2 -translate-x-1/2 w-[2px] h-10 bg-gray-200 dark:bg-white/10" />}
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-black dark:text-white">Updated "E-Commerce Dashboard" project</p>
-                  <p className="text-xs text-gray-500 mt-1">2 hours ago</p>
+                  <p className="text-sm font-medium text-black dark:text-white">{activity.action}</p>
+                  <p className="text-xs text-gray-500 mt-1">{new Date(activity.date).toLocaleString()}</p>
                 </div>
               </div>
-            ))}
+            )) : (
+              <p className="text-gray-400 text-sm">No recent activities found.</p>
+            )}
           </div>
         </div>
       </div>

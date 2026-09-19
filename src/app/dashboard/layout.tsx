@@ -1,14 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuthStore } from "@/store/auth.store";
-import { 
-  LayoutDashboard, 
-  Settings, 
-  FolderGit2, 
-  Briefcase, 
+import { useQuery } from "@tanstack/react-query";
+import { ContactService } from "@/services/contact.service";
+import {
+  LayoutDashboard,
+  Settings,
+  FolderGit2,
+  Briefcase,
   GraduationCap,
   FileText,
   LogOut,
@@ -23,10 +25,11 @@ import {
   Tags,
   Search,
   Type,
-  Palette
+  Palette,
+  Mail
 } from "lucide-react";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster, toast } from "sonner";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { accessToken, logout } = useAuthStore();
@@ -56,6 +59,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  const { data: unreadMessages } = useQuery({
+    queryKey: ["unreadMessages"],
+    queryFn: () => ContactService.getMessages({ status: 'UNREAD', limit: 1 }),
+    refetchInterval: 10000,
+    enabled: !!accessToken,
+  });
+
+  const unreadCount = unreadMessages?.meta?.total || 0;
+  const prevUnreadCountRef = useRef(unreadCount);
+
+  useEffect(() => {
+    if (unreadCount > prevUnreadCountRef.current) {
+      toast.info(`You have ${unreadCount - prevUnreadCountRef.current} new message(s)!`, {
+        icon: '📨',
+        description: "Check your messages dashboard to read them."
+      });
+    }
+    prevUnreadCountRef.current = unreadCount;
+  }, [unreadCount]);
+
   const handleLogout = () => {
     logout();
     router.push("/login");
@@ -63,19 +86,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const menuItems = [
     { name: "Overview", icon: LayoutDashboard, href: "/dashboard" },
-    { name: "Hero Section", icon: Type, href: "/dashboard/hero" },
-    { name: "Skills", icon: Code, href: "/dashboard/skills" },
-    { name: "Experience", icon: Briefcase, href: "/dashboard/experience" },
-    { name: "Education", icon: GraduationCap, href: "/dashboard/education" },
-    { name: "Services", icon: Package, href: "/dashboard/services" },
-    { name: "Projects", icon: FolderGit2, href: "/dashboard/projects" },
-    { name: "Categories", icon: Tags, href: "/dashboard/project-categories" },
-    { name: "Certificates", icon: Award, href: "/dashboard/certificates" },
+    { name: "Messages", icon: Mail, href: "/dashboard/messages", badge: unreadCount },
+    { name: "Theme Editor", icon: Palette, href: "/dashboard/customize" },
     { name: "Blog Posts", icon: FileText, href: "/dashboard/blogs" },
-    { name: "Testimonials", icon: MessageSquare, href: "/dashboard/testimonials" },
-    { name: "Social Links", icon: LinkIcon, href: "/dashboard/social-links" },
     { name: "SEO Settings", icon: Search, href: "/dashboard/seo-settings" },
-    { name: "Customize Theme", icon: Palette, href: "/dashboard/customize" },
   ];
 
   if (!accessToken) return null; // Prevent flicker before redirect
@@ -83,20 +97,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
       <div className="flex h-screen bg-gray-50 dark:bg-[#0A0A0A] overflow-hidden text-black dark:text-white">
-        
+
         {/* Mobile Sidebar Overlay */}
         {isMobile && isSidebarOpen && (
-          <div 
+          <div
             className="fixed inset-0 bg-black/50 z-40"
             onClick={() => setIsSidebarOpen(false)}
           />
         )}
 
         {/* Sidebar */}
-        <aside 
-          className={`fixed lg:static top-0 left-0 h-full bg-white dark:bg-[#1A1C23] border-r border-gray-200 dark:border-white/10 z-50 flex flex-col transition-all duration-300 shrink-0 ${
-            isSidebarOpen ? "w-64 translate-x-0" : "w-64 -translate-x-full lg:w-20 lg:translate-x-0"
-          }`}
+        <aside
+          className={`fixed lg:static top-0 left-0 h-full bg-white dark:bg-[#1A1C23] border-r border-gray-200 dark:border-white/10 z-50 flex flex-col transition-all duration-300 shrink-0 ${isSidebarOpen ? "w-64 translate-x-0" : "w-64 -translate-x-full lg:w-20 lg:translate-x-0"
+            }`}
         >
           <div className={`h-16 flex items-center border-b border-gray-200 dark:border-white/10 shrink-0 ${isSidebarOpen ? 'justify-between px-6' : 'lg:justify-center px-6 lg:px-0 justify-between'}`}>
             <h2 className={`text-xl font-bold text-black dark:text-white whitespace-nowrap transition-all duration-300 ${isSidebarOpen ? 'opacity-100' : 'lg:opacity-0 lg:w-0 lg:hidden'}`}>
@@ -114,21 +127,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {menuItems.map((item, index) => {
               const isActive = pathname === item.href;
               return (
-                <Link 
+                <Link
                   key={index}
                   href={item.href}
                   title={!isSidebarOpen ? item.name : undefined}
-                  className={`flex items-center gap-3 py-3 rounded-xl transition-all duration-300 ${isSidebarOpen ? 'px-4' : 'lg:justify-center px-4 lg:px-0'} ${
-                    isActive
+                  className={`flex items-center justify-between py-3 rounded-xl transition-all duration-300 ${isSidebarOpen ? 'px-4' : 'lg:justify-center px-4 lg:px-0'} ${isActive
                       ? "bg-blue-500 text-white shadow-md shadow-blue-500/20"
                       : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-black dark:hover:text-white"
-                  }`}
+                    }`}
                   onClick={() => isMobile && setIsSidebarOpen(false)}
                 >
-                  <item.icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-white' : ''}`} />
-                  <span className={`font-medium whitespace-nowrap transition-all duration-300 ${isSidebarOpen ? 'opacity-100' : 'lg:opacity-0 lg:w-0 lg:hidden'}`}>
-                    {item.name}
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <item.icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-white' : ''}`} />
+                    <span className={`font-medium whitespace-nowrap transition-all duration-300 ${isSidebarOpen ? 'opacity-100' : 'lg:opacity-0 lg:w-0 lg:hidden'}`}>
+                      {item.name}
+                    </span>
+                  </div>
+                  {(item as any).badge && (item as any).badge > 0 ? (
+                    <span className={`bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full transition-all duration-300 ${isSidebarOpen ? 'opacity-100' : 'lg:opacity-0 lg:w-0 lg:hidden'}`}>
+                      {(item as any).badge}
+                    </span>
+                  ) : null}
                 </Link>
               );
             })}
@@ -145,7 +164,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </div>
             </div>
 
-            <button 
+            <button
               onClick={handleLogout}
               title={!isSidebarOpen ? "Logout" : undefined}
               className={`flex items-center justify-center gap-2 w-full py-2.5 bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20 rounded-xl font-medium transition-colors ${isSidebarOpen ? 'px-4' : 'lg:px-0'}`}
@@ -158,11 +177,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col h-full overflow-hidden relative">
-          
+
           {/* Topbar */}
           <header className="h-16 bg-white dark:bg-[#1A1C23] border-b border-gray-200 dark:border-white/10 flex items-center justify-between px-4 sm:px-8 shrink-0 relative z-30">
             <div className="flex items-center gap-4">
-              <button 
+              <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                 className="p-2 -ml-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5"
               >
@@ -179,8 +198,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </header>
 
           {/* Page Content */}
-          <main className={`flex-1 overflow-y-auto bg-gray-50 dark:bg-[#0A0A0A] ${pathname === '/dashboard/customize' ? 'p-0 flex flex-col' : 'p-4 sm:p-8'}`}>
-            <div className={`mx-auto ${pathname === '/dashboard/customize' ? 'max-w-full flex-1 w-full flex flex-col' : 'max-w-6xl'}`}>
+          <main className={`flex-1 bg-gray-50 dark:bg-[#0A0A0A] ${pathname === '/dashboard/customize' ? 'p-0 flex flex-col overflow-hidden' : 'p-4 sm:p-8 overflow-y-auto'}`}>
+            <div className={`mx-auto ${pathname === '/dashboard/customize' ? 'h-full max-w-full w-full flex flex-col overflow-hidden' : 'max-w-6xl'}`}>
               {children}
             </div>
           </main>
