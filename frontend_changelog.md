@@ -43,3 +43,4 @@
 - **03:46 AM**: Adjust responsive behavior in skills page
 - **04:01 AM**: Optimize image loading in blogs section
 - **04:02 AM**: Update SVG icons to match new design
+- **04:20 AM**: Fix z-index issues in sticky headers
