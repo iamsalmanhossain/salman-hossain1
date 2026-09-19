@@ -90,7 +90,7 @@ export default function ProjectCategoriesDashboard() {
           <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
         </div>
       ) : (
-        <div className="bg-white dark:bg-[#1A1C23] border border-gray-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-sm max-w-3xl">
+        <div className="bg-white dark:bg-[#1A1C23] border border-gray-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-sm w-full">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50 dark:bg-black/20 border-b border-gray-200 dark:border-white/10">

@@ -114,16 +114,24 @@ const TechSphere: React.FC = () => {
         ctx.font = "bold 26px monospace";
         ctx.fillText(item.name, 128, 200);
 
-        if (item.symbol.startsWith('http')) {
+        if (item.symbol.startsWith('http') || item.symbol.startsWith('/') || item.symbol.startsWith('data:image')) {
           const img = new window.Image();
-          img.crossOrigin = "anonymous";
+          
+          let imageSrc = item.symbol;
+          if (item.symbol.startsWith('http')) {
+             // Use our local proxy to avoid canvas CORS tainting issues
+             imageSrc = `/api/proxy-image?url=${encodeURIComponent(item.symbol)}`;
+          } else {
+             // For relative paths or data URIs, we don't need proxy but might need crossOrigin for external relative? Not usually.
+          }
           
           img.onload = () => {
             // Draw image scaled down
             ctx.drawImage(img, 78, 40, 100, 100);
             texture.needsUpdate = true;
           };
-          img.onerror = () => {
+          img.onerror = (e) => {
+            console.error("Image failed to load on 3D globe:", item.symbol, e);
             // Fallback to first letter if image fails to load
             ctx.fillStyle = item.color;
             ctx.font = "bold 85px sans-serif";
@@ -131,10 +139,7 @@ const TechSphere: React.FC = () => {
             texture.needsUpdate = true;
           };
 
-          // Add a dummy query string to bypass browser cache for CORS
-          const srcUrl = new URL(item.symbol);
-          srcUrl.searchParams.set("cors", "1");
-          img.src = srcUrl.toString();
+          img.src = imageSrc;
         } else {
           ctx.fillStyle = item.color;
           ctx.font = "bold 85px sans-serif";

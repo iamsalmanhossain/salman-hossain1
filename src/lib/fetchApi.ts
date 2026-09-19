@@ -34,10 +34,18 @@ export interface FetchApi {
 }
 
 export const fetchApi = (async (endpoint: string, options: FetchOptions = {}): Promise<any> => {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+  let apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
   const { data, headers, _retry, params, responseType, skipAuthRefresh, ...restOptions } = options;
 
   const isClient = typeof window !== 'undefined';
+  
+  // ক্লায়েন্ট সাইডে ব্রাউজার থেকে কল হলে ব্যাকএন্ড URL হাইড করার জন্য শুধু পাথটুকু (/api/v1) নেওয়া হচ্ছিল।
+  // কিন্তু Vercel-এ rewrite ঠিকমতো কাজ না করায় এটি সরাসরি ব্যাকএন্ডে রিকোয়েস্ট পাঠাবে।
+  // if (isClient && apiUrl.startsWith('http')) {
+  //   try {
+  //     apiUrl = new URL(apiUrl).pathname;
+  //   } catch (e) {}
+  // }
   
   let token = null;
   if (isClient) {
@@ -91,6 +99,11 @@ export const fetchApi = (async (endpoint: string, options: FetchOptions = {}): P
 
     const response = await fetch(url.toString(), config);
 
+    // 204 (No Content) হলে ফাঁকা ডেটা পাঠাবে, JSON parse করবে না
+    if (response.status === 204) {
+      return { data: {} };
+    }
+
     // 401 Unauthorized এবং রিফ্রেশ টোকেন লজিক
     if (response.status === 401 && !_retry && !skipAuthRefresh) {
       const handleLogout = () => {
@@ -120,7 +133,7 @@ export const fetchApi = (async (endpoint: string, options: FetchOptions = {}): P
         isRefreshing = true;
 
         return new Promise((resolve, reject) => {
-          const refreshUrl = `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`;
+          const refreshUrl = `${apiUrl}/auth/refresh-token`;
 
           fetch(refreshUrl, { method: 'POST' })
             .then(async (res) => {

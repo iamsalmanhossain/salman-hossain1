@@ -12,7 +12,12 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       accessToken: null,
       setAccessToken: (token: string | null) => set({ accessToken: token }),
-      logout: () => set({ accessToken: null }),
+      logout: () => {
+        set({ accessToken: null });
+        if (typeof document !== 'undefined') {
+          document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        }
+      },
     }),
     {
       name: 'auth-storage',

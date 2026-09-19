@@ -1,14 +1,14 @@
 export interface DashboardStats {
+  totalViews: number;
   totalProjects: number;
-  totalSkills: number;
-  totalExperiences: number;
   totalMessages: number;
+  activeVisitors: number;
 }
 
 export interface DashboardActivity {
-  id: string;
-  message: string;
-  createdAt: string;
+  id: number;
+  action: string;
+  date: string;
 }
 
 export interface DashboardChartData {
