@@ -2,68 +2,67 @@
 
 import { useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { HeroSectionService } from "@/services/heroSection.service";
+import { getAboutSections, createAboutSection, updateAboutSection } from "@/services/about.service";
 import { Loader2, Save } from "lucide-react";
-import { CreateHeroSectionDto } from "@/types/heroSection";
+import { IAbout, ICreateAbout } from "@/types/about";
 import { useForm, Controller } from "react-hook-form";
 import FileUpload from "@/components/FileUpload";
 import { toast } from "sonner";
 
-export default function HeroDashboard({ hideHeader, onNext }: { hideHeader?: boolean, onNext?: () => void }) {
+export default function AboutDashboard({ hideHeader, onNext }: { hideHeader?: boolean, onNext?: () => void }) {
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
-    queryKey: ["hero"],
-    queryFn: () => HeroSectionService.getHeroSection(),
+    queryKey: ["aboutSections"],
+    queryFn: () => getAboutSections(),
   });
 
-  const { register, handleSubmit, reset, setValue, control } = useForm<CreateHeroSectionDto>();
-  const heroData = data?.data;
+  const { register, handleSubmit, reset, setValue, control } = useForm<ICreateAbout>();
+  const aboutData = data?.data && data.data.length > 0 ? data.data[0] : null;
 
   useEffect(() => {
-    if (heroData) {
-      setValue("heroTitle", heroData.heroTitle);
-      setValue("designations", (heroData.designations || []).join(', ') as any);
-      setValue("heroDescription", heroData.heroDescription);
-      setValue("resumeUrl", heroData.resumeUrl);
-      setValue("profileImage", heroData.profileImage);
-      setValue("experienceYears", heroData.experienceYears);
-      setValue("totalProjects", heroData.totalProjects);
-      setValue("totalToolsAndTech", heroData.totalToolsAndTech);
-      setValue("email", heroData.email);
-      setValue("phone", heroData.phone);
-      setValue("location", heroData.location);
-      setValue("isActive", heroData.isActive);
+    if (aboutData) {
+      setValue("name", aboutData.name);
+      setValue("headline", aboutData.headline);
+      setValue("shortBio", aboutData.shortBio);
+      setValue("description", aboutData.description);
+      setValue("profileImage", aboutData.profileImage);
+      setValue("resumeUrl", aboutData.resumeUrl);
+      setValue("location", aboutData.location);
+      setValue("email", aboutData.email);
+      setValue("availability", aboutData.availability);
+      setValue("experienceYears", aboutData.experienceYears);
+      setValue("projectsCount", aboutData.projectsCount);
+      setValue("clientsCount", aboutData.clientsCount);
     }
-  }, [heroData, setValue]);
+  }, [aboutData, setValue]);
 
   const updateMutation = useMutation({
-    mutationFn: (formData: CreateHeroSectionDto) => {
-      if (heroData?.id) {
-        return HeroSectionService.updateHeroSection(heroData.id, formData);
+    mutationFn: (formData: ICreateAbout) => {
+      if (aboutData?.id) {
+        return updateAboutSection(aboutData.id, formData);
       } else {
-        return HeroSectionService.createHeroSection(formData);
+        return createAboutSection(formData);
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["heroSection"] });
-      toast.success("Hero section saved successfully!");
+      queryClient.invalidateQueries({ queryKey: ["aboutSections"] });
+      toast.success("About section saved successfully!");
       if (onNext) onNext();
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Failed to save Hero section");
+      toast.error(error?.response?.data?.message || "Failed to save About section");
     }
   });
 
-  const onSubmit = (formData: CreateHeroSectionDto) => {
+  const onSubmit = (formData: ICreateAbout) => {
     const payload = {
       ...formData,
-      designations: (formData.designations as unknown as string).split(',').map(s => s.trim()).filter(Boolean),
       experienceYears: Number(formData.experienceYears) || 0,
-      totalProjects: Number(formData.totalProjects) || 0,
-      totalToolsAndTech: Number(formData.totalToolsAndTech) || 0,
+      projectsCount: Number(formData.projectsCount) || 0,
+      clientsCount: Number(formData.clientsCount) || 0,
     };
-    updateMutation.mutate(payload as CreateHeroSectionDto);
+    updateMutation.mutate(payload as ICreateAbout);
   };
 
   if (isLoading) {
@@ -78,8 +77,8 @@ export default function HeroDashboard({ hideHeader, onNext }: { hideHeader?: boo
     <div className={`space-y-6 mx-auto ${hideHeader ? 'max-w-full' : 'max-w-4xl'}`}>
       {!hideHeader && (
         <div>
-          <h2 className="text-2xl font-bold text-black dark:text-white">Hero Section</h2>
-          <p className="text-gray-500 dark:text-gray-400">Manage the main content of your home page</p>
+          <h2 className="text-2xl font-bold text-black dark:text-white">About Me</h2>
+          <p className="text-gray-500 dark:text-gray-400">Manage your personal information and bio</p>
         </div>
       )}
 
@@ -87,75 +86,76 @@ export default function HeroDashboard({ hideHeader, onNext }: { hideHeader?: boo
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
               <input 
-                {...register("heroTitle", { required: true })} 
+                {...register("name", { required: true })} 
                 className="w-full px-4 py-2.5 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" 
-                placeholder="E.g., Abass Alzouma"
+                placeholder="E.g., John Doe"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Designations (Comma separated)</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Headline</label>
               <input 
-                {...register("designations")} 
+                {...register("headline", { required: true })} 
                 className="w-full px-4 py-2.5 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" 
-                placeholder="E.g., Full Stack Developer"
+                placeholder="E.g., Senior Software Engineer"
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Short Bio</label>
             <textarea 
-              {...register("heroDescription", { required: true })} 
-              rows={4} 
+              {...register("shortBio", { required: true })} 
+              rows={3} 
               className="w-full px-4 py-2.5 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500"
-              placeholder="Passionate web and mobile developer..."
+              placeholder="A brief introduction about yourself..."
             />
           </div>
 
-
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Full Description</label>
+            <textarea 
+              {...register("description", { required: true })} 
+              rows={6} 
+              className="w-full px-4 py-2.5 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500"
+              placeholder="Detailed background and information..."
+            />
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Years of Experience</label>
               <input 
                 type="number"
-                {...register("experienceYears")} 
+                {...register("experienceYears", { required: true })} 
                 className="w-full px-4 py-2.5 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" 
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Projects</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Projects Count</label>
               <input 
                 type="number"
-                {...register("totalProjects")} 
+                {...register("projectsCount", { required: true })} 
                 className="w-full px-4 py-2.5 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" 
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Tools & Tech</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Clients Count</label>
               <input 
                 type="number"
-                {...register("totalToolsAndTech")} 
+                {...register("clientsCount", { required: true })} 
                 className="w-full px-4 py-2.5 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" 
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
               <input 
                 type="email"
                 {...register("email")} 
-                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" 
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Phone</label>
-              <input 
-                {...register("phone")} 
                 className="w-full px-4 py-2.5 bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500" 
               />
             </div>
@@ -167,6 +167,16 @@ export default function HeroDashboard({ hideHeader, onNext }: { hideHeader?: boo
                 placeholder="E.g., Dhaka, Bangladesh"
               />
             </div>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <input 
+              type="checkbox"
+              id="availability"
+              {...register("availability")} 
+              className="w-4 h-4 text-blue-500 rounded focus:ring-blue-500" 
+            />
+            <label htmlFor="availability" className="text-sm font-medium text-gray-700 dark:text-gray-300">Available for Freelance / Hire</label>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

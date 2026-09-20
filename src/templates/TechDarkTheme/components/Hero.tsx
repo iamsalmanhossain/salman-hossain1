@@ -1,39 +1,37 @@
 "use client";
 
 import Image from "next/image";
-import { motion, Variants } from "framer-motion";
-import { ExternalLink, Users, ChevronRight, Mail, Sparkles, ChevronDown } from "lucide-react";
-import GlowCursor from "./GlowCursor";
+import Link from "next/link";
+import { motion, Variants, AnimatePresence, useMotionValue, useTransform, animate } from "framer-motion";
+
+function AnimatedCounter({ from = 0, to = 100, duration = 2 }: { from?: number; to: number; duration?: number }) {
+  const count = useMotionValue(from);
+  const rounded = useTransform(count, (latest) => Math.round(latest));
+
+  useEffect(() => {
+    const controls = animate(count, to, { duration, ease: "easeOut" });
+    return controls.stop;
+  }, [count, to, duration]);
+
+  return <motion.span>{rounded}</motion.span>;
+}
+import { ExternalLink, Users, ChevronRight, Mail, Sparkles, MoveRight, X, ChevronDown, Download, ZoomIn, ZoomOut } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { HeroSectionService } from "@/services/heroSection.service";
 
-// Custom SVG Icons for Brands
-const GithubIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.2c3-.3 6-1.5 6-6.5a5.5 5.5 0 0 0-1.5-3.8 5.5 5.5 0 0 0-.1-3.8s-1.2-.4-3.9 1.4a13.3 13.3 0 0 0-7 0C6.2 1.6 5 2 5 2a5.5 5.5 0 0 0-.1 3.8A5.5 5.5 0 0 0 3 9.6c0 5 3 6.2 6 6.5a4.8 4.8 0 0 0-1 3.2v4"></path>
-    <path d="M9 18c-4.5 1.5-5-2.5-7-3"></path>
-  </svg>
+const DefaultIcon = ({ className }: { className?: string }) => (
+  <ExternalLink className={className} />
 );
 
-const TwitterIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
-  </svg>
-);
-
-const LinkedinIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
-    <rect x="2" y="9" width="4" height="12"></rect>
-    <circle cx="4" cy="4" r="2"></circle>
-  </svg>
-);
-
+import { ResumeModal } from "./ResumeModal";
 export default function Hero() {
-  const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const { resolvedTheme } = useTheme();
+  const isDark = mounted && resolvedTheme === "dark";
+  const [currentDesignationIndex, setCurrentDesignationIndex] = useState(0);
+  const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
 
   const { data: heroData } = useQuery({
     queryKey: ['hero'],
@@ -45,148 +43,297 @@ export default function Hero() {
   useEffect(() => {
     setMounted(true);
   }, []);
-  
-  const isLight = mounted && theme === 'light';
 
+  useEffect(() => {
+    if (!hero?.designations || hero.designations.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentDesignationIndex((prev) => (prev + 1) % hero.designations.length);
+    }, 3500);
+    return () => clearInterval(interval);
+  }, [hero?.designations]);
+
+  // Framer Motion Variants for B&W minimalist animations
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.08,
+        staggerChildren: 0.15,
+        delayChildren: 0.2,
       },
     },
   };
 
-  const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 10 },
+  const textRevealVariants: Variants = {
+    hidden: { opacity: 0, y: 40, filter: "blur(8px)" },
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.4 },
+      filter: "blur(0px)",
+      transition: { duration: 1, ease: [0.16, 1, 0.3, 1] },
+    },
+  };
+
+  const letterVariants: Variants = {
+    hidden: { opacity: 0, y: 20, rotateX: -90 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      rotateX: 0,
+      transition: { duration: 0.8, ease: [0.2, 0.65, 0.3, 0.9] }
+    }
+  };
+
+  const fadeUpVariants: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6, ease: "easeOut" },
     },
   };
 
   return (
-    <section id="home" className="h-screen relative overflow-hidden bg-transparent text-black dark:text-white transition-colors duration-300 w-full">
-      <div className="flex items-center justify-center w-full h-full px-4 sm:px-8 lg:px-16 pt-10 pb-6">
-        <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center z-10 relative w-full">
-          
-          {/* Left Column - Image */}
-          <motion.div 
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-            className="relative mx-auto lg:ml-auto order-2 lg:order-1 max-w-[16rem] sm:max-w-[20rem] lg:max-w-[22rem] w-full"
-          >
-            {/* Decorative background shapes */}
-            <div className="absolute -top-3 -right-3 w-full h-full bg-[#E5ECE9] dark:bg-[#1A362D] rounded-3xl -z-10 transition-colors duration-300" />
-            <div className="absolute -bottom-3 -left-3 w-full h-full bg-[#E5ECE9] dark:bg-[#1A362D] rounded-3xl -z-10 transition-colors duration-300" />
-            
-            <div className="relative aspect-[4/5] w-full rounded-3xl overflow-hidden bg-gray-200 dark:bg-[#382F75] transition-colors duration-300 shadow-2xl">
-               <div className="w-full h-full relative">
-                 <Image 
-                   src={hero?.profileImage || "https://i.ibb.co/JwJPT9qY/profile-Fb.jpg"} 
-                   alt="Profile" 
-                   fill
-                   className="object-cover" 
-                   priority
-                   unoptimized
-                 />
-               </div>
-            </div>
+    <section id="home" className="min-h-screen relative overflow-hidden bg-transparent text-black dark:text-white w-full flex items-center justify-center pt-24 lg:pt-0 pb-16 lg:pb-0 selection:bg-white selection:text-black">
 
-            {/* Available Badge */}
-            <motion.div 
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.5, type: "spring" }}
-              className="absolute -bottom-5 left-4 sm:-bottom-4 sm:left-6 bg-white dark:bg-[#0E1513] border border-gray-200 dark:border-[#1A362D] px-3 py-1.5 sm:px-4 sm:py-2 rounded-full flex items-center gap-2 shadow-xl transition-colors duration-300"
-            >
-              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Available</span>
-            </motion.div>
-          </motion.div>
+      {/* Background B&W Grid & Grain */}
+      <div className="absolute inset-0 z-0 opacity-20 pointer-events-none"
+        style={{ backgroundImage: `radial-gradient(circle at center, ${isDark ? '#ffffff' : '#000000'} 1px, transparent 1px)`, backgroundSize: '32px 32px' }} />
+      <div className="absolute inset-0 z-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 mix-blend-overlay pointer-events-none"></div>
 
-          {/* Right Column - Content */}
-          <motion.div 
+
+      <div className="w-full h-full px-6 sm:px-10 lg:px-16 flex items-center justify-center z-10">
+        <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center w-full">
+
+          {/* Left Column - Content */}
+          <motion.div
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="order-1 lg:order-2 flex flex-col items-start text-left mx-auto lg:mx-0 max-w-lg w-full pointer-events-none"
+            className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left order-2 lg:order-1 w-full"
           >
+            {/* Dynamic Designation Badge */}
             {hero?.designations && hero.designations.length > 0 && (
-              <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 mb-4 transition-colors duration-300 pointer-events-auto">
-                <Sparkles className="w-3 h-3 text-orange-400" />
-                <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{hero.designations[0]}</span>
+              <motion.div variants={fadeUpVariants} className="mb-8">
+                <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full border border-black/20 dark:border-white/20 bg-black/5 dark:bg-white/5 backdrop-blur-sm">
+                  <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                  <div className="h-5 overflow-hidden relative w-[160px] sm:w-[180px] text-left">
+                    <AnimatePresence mode="wait">
+                      <motion.span
+                        key={currentDesignationIndex}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.4, ease: "easeInOut" }}
+                        className="absolute inset-0 flex items-center text-xs sm:text-sm font-medium text-gray-800 dark:text-gray-200 tracking-wide uppercase"
+                      >
+                        {hero.designations[currentDesignationIndex]}
+                      </motion.span>
+                    </AnimatePresence>
+                  </div>
+                </div>
               </motion.div>
             )}
 
-            <motion.h1 variants={itemVariants} className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-3 pointer-events-auto">
-              <span className="text-gray-500 dark:text-gray-400 font-light">Hello, I am</span>{" "}
-              <span className="text-black dark:text-white transition-colors duration-300">{hero?.heroTitle || "Abass Alzouma"}</span>
-            </motion.h1>
+            {/* Title */}
+            <div className="overflow-hidden mb-6 w-full perspective-[1000px]">
+              <motion.h1 variants={textRevealVariants} className="text-5xl sm:text-7xl lg:text-[5.5rem] font-black tracking-tighter leading-[0.95] text-black dark:text-white">
+                <span className="block text-gray-600 dark:text-gray-500 font-medium tracking-normal text-2xl sm:text-3xl mb-4">Hello, I am</span>
+                <span className="inline-flex flex-wrap gap-x-4">
+                  {(hero?.heroTitle || "Salman Hossain").split(' ').map((word: string, i: number) => (
+                    <span key={i} className="inline-flex overflow-hidden">
+                      {word.split('').map((char: string, j: number) => (
+                        <motion.span
+                          key={`${i}-${j}`}
+                          variants={letterVariants}
+                          className="inline-block origin-bottom"
+                        >
+                          {char}
+                        </motion.span>
+                      ))}
+                    </span>
+                  ))}
+                </span>
+              </motion.h1>
+            </div>
 
-            {/* A small underline accent */}
-            <motion.div variants={itemVariants} className="w-12 h-1 bg-[#4ade80] rounded-full mb-4 pointer-events-auto" />
+            <div className="overflow-hidden mb-10 w-full max-w-2xl">
+              <motion.p variants={textRevealVariants} className="text-gray-600 dark:text-gray-400 text-base sm:text-lg lg:text-xl leading-relaxed font-light">
+                {hero?.heroDescription || "I build robust backend systems and beautiful web applications."}
+              </motion.p>
+            </div>
 
-            <motion.p variants={itemVariants} className="text-gray-600 dark:text-gray-400 text-sm sm:text-base leading-relaxed mb-4 max-w-xl pointer-events-auto">
-              {hero?.heroDescription || "Passionate web and mobile developer with over 6 years of experience in programming and web technologies. Through my work, I turn ideas into modern visual and digital experiences by combining web development, graphic design, motion design, video editing, and content creation."}
-            </motion.p>
-
-            <motion.a variants={itemVariants} href="#" className="text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors text-xs font-medium underline underline-offset-4 mb-6 block pointer-events-auto">
-              What AI is saying about me.
-            </motion.a>
-
-            {/* Stats */}
-            <motion.div variants={itemVariants} className="grid grid-cols-3 gap-4 w-full max-w-md mb-6 pointer-events-auto">
-              <div>
-                <h3 className="text-2xl sm:text-3xl font-bold text-black dark:text-white mb-1 transition-colors duration-300">{hero?.experienceYears || 0}+</h3>
-                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 transition-colors duration-300">Years of Experience</p>
+            {/* Minimalist Stats */}
+            <motion.div variants={fadeUpVariants} className="grid grid-cols-3 gap-4 sm:gap-8 w-full max-w-xl mb-12 border-y border-black/10 dark:border-white/10 py-6">
+              <div className="flex flex-col items-center lg:items-start group">
+                <h3 className="text-3xl sm:text-4xl font-bold text-black dark:text-white mb-2 tracking-tighter flex items-center">
+                  <AnimatedCounter to={Number(hero?.experienceYears) || 5} duration={2} />
+                  <span className="text-black dark:text-white/50 ml-1">+</span>
+                </h3>
+                <p className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-500 uppercase tracking-widest font-semibold group-hover:text-black dark:text-white transition-colors duration-300">Years Exp.</p>
               </div>
-              <div>
-                <h3 className="text-2xl sm:text-3xl font-bold text-black dark:text-white mb-1 transition-colors duration-300">{hero?.totalProjects || 0}+</h3>
-                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 transition-colors duration-300">Projects Completed</p>
+              <div className="flex flex-col items-center lg:items-start border-l border-black/10 dark:border-white/10 pl-4 sm:pl-8 group">
+                <h3 className="text-3xl sm:text-4xl font-bold text-black dark:text-white mb-2 tracking-tighter flex items-center">
+                  <AnimatedCounter to={Number(hero?.totalProjects) || 50} duration={2.5} />
+                  <span className="text-black dark:text-white/50 ml-1">+</span>
+                </h3>
+                <p className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-500 uppercase tracking-widest font-semibold group-hover:text-black dark:text-white transition-colors duration-300">Projects</p>
               </div>
-              <div>
-                <h3 className="text-2xl sm:text-3xl font-bold text-black dark:text-white mb-1 transition-colors duration-300">{hero?.totalToolsAndTech || 0}+</h3>
-                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 transition-colors duration-300">Tools & Tech</p>
+              <div className="flex flex-col items-center lg:items-start border-l border-black/10 dark:border-white/10 pl-4 sm:pl-8 group">
+                <h3 className="text-3xl sm:text-4xl font-bold text-black dark:text-white mb-2 tracking-tighter flex items-center">
+                  <AnimatedCounter to={Number(hero?.totalToolsAndTech) || 30} duration={3} />
+                  <span className="text-black dark:text-white/50 ml-1">+</span>
+                </h3>
+                <p className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-500 uppercase tracking-widest font-semibold group-hover:text-black dark:text-white transition-colors duration-300">Technologies</p>
               </div>
             </motion.div>
 
             {/* Buttons */}
-            <motion.div variants={itemVariants} className="flex flex-wrap gap-3 mb-6 pointer-events-auto">
-              <a href="#about" className="px-5 py-2.5 text-sm bg-gradient-to-r from-blue-500 to-emerald-400 hover:from-blue-600 hover:to-emerald-500 text-white font-medium rounded-lg flex items-center gap-2 transition-all shadow-lg shadow-emerald-500/20 cursor-pointer">
-                More About Me
-                <ExternalLink className="w-3.5 h-3.5" />
-              </a>
-              <a href="#contact" className="px-5 py-2.5 text-sm bg-gray-100 dark:bg-[#1A1C23] hover:bg-gray-200 dark:hover:bg-[#252833] text-black dark:text-white font-medium rounded-lg flex items-center gap-2 transition-colors border border-gray-200 dark:border-white/5 cursor-pointer">
-                Contact Me
-                <Users className="w-3.5 h-3.5" />
-              </a>
+            <motion.div variants={fadeUpVariants} className="flex flex-col sm:flex-row items-center gap-4 mb-8 w-full sm:w-auto">
+              <Link href="/about" className="group relative overflow-hidden w-full sm:w-auto px-8 py-4 bg-white text-black font-semibold flex items-center justify-center transition-colors duration-300">
+                <span className="absolute inset-y-0 left-0 w-0 bg-black transition-all duration-[400ms] ease-out group-hover:w-full z-0" />
+                <span className="relative z-10 flex items-center gap-3 group-hover:text-white transition-colors duration-300">
+                  More About Me
+                  <MoveRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </span>
+              </Link>
               {hero?.resumeUrl && (
-                <a href={hero.resumeUrl} target="_blank" rel="noreferrer" className="px-5 py-2.5 text-sm bg-transparent hover:bg-black/5 dark:hover:bg-white/5 text-black dark:text-white font-medium rounded-lg flex items-center gap-2 transition-colors border border-black/10 dark:border-white/10 cursor-pointer">
-                  Download Resume
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </a>
+                <button onClick={() => setIsResumeModalOpen(true)} className="cursor-pointer group relative overflow-hidden w-full sm:w-auto px-8 py-4 bg-transparent border border-black/20 dark:border-white/20 text-black dark:text-white font-semibold flex items-center justify-center transition-colors duration-300">
+                  <span className="absolute inset-y-0 left-0 w-0 bg-black dark:bg-white transition-all duration-[400ms] ease-out group-hover:w-full z-0" />
+                  <span className="relative z-10 flex items-center gap-3 group-hover:text-white dark:group-hover:text-black transition-colors duration-300">
+                    View Resume
+                    <ExternalLink className="w-4 h-4 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" />
+                  </span>
+                </button>
               )}
+              <Link href="#contact" className="hidden sm:flex group relative overflow-hidden w-full sm:w-auto px-8 py-4 bg-black dark:bg-white text-white dark:text-black font-semibold items-center justify-center transition-colors duration-300">
+                <span className="absolute inset-y-0 left-0 w-0 bg-white dark:bg-black transition-all duration-[400ms] ease-out group-hover:w-full z-0" />
+                <span className="relative z-10 flex items-center gap-3 group-hover:text-black dark:group-hover:text-white transition-colors duration-300">
+                  Let's Talk
+                </span>
+              </Link>
             </motion.div>
 
-            {/* Social Links */}
-            <motion.div variants={itemVariants} className="flex items-center gap-4 border-t border-black/10 dark:border-white/10 pt-4 w-full max-w-lg transition-colors duration-300 pointer-events-auto">
-              <span className="text-xs text-gray-500 dark:text-gray-400">Connect with me:</span>
-              <div className="flex gap-2.5">
-                {[GithubIcon, TwitterIcon, LinkedinIcon, Mail].map((Icon, i) => (
-                  <a key={i} href="#" className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 flex items-center justify-center transition-colors border border-black/10 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white cursor-pointer">
-                    <Icon className="w-3.5 h-3.5" />
-                  </a>
+            {/* Interactive Social Links */}
+            <motion.div variants={fadeUpVariants} className="relative h-12 flex items-center w-full justify-center lg:justify-start group cursor-pointer mb-8">
+              {/* Default text boxes */}
+              <div className="absolute left-1/2 -translate-x-1/2 lg:left-0 lg:translate-x-0 flex items-center gap-2 pointer-events-none">
+                {["C", "O", "N", "T", "A", "C", "T"].map((letter, idx) => (
+                  <div
+                    key={idx}
+                    style={{ transitionDelay: `${idx * 50}ms` }}
+                    className="w-10 h-10 rounded-xl bg-gray-200 dark:bg-[#1A1A1A] flex items-center justify-center border border-black/10 dark:border-white/10 shadow-lg transition-all duration-500 opacity-100 group-hover:opacity-0 group-hover:-translate-y-4"
+                  >
+                    <span className="text-black dark:text-white font-black text-sm">{letter}</span>
+                  </div>
                 ))}
+              </div>
+
+              {/* Icons to reveal */}
+              <div className="absolute left-1/2 -translate-x-1/2 lg:left-0 lg:translate-x-0 flex items-center gap-2">
+                {[...Array(7)].map((_, i) => {
+                  const activeLinks = hero?.socialLinks?.filter((l: any) => l.isActive) || [];
+                  const link = activeLinks[i];
+
+                  if (link) {
+                    return (
+                      <a
+                        key={i}
+                        href={link.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{ transitionDelay: `${i * 50}ms` }}
+                        className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-lg transition-all duration-500 opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 hover:!scale-110 overflow-hidden"
+                      >
+                        {link.iconUrl ? (
+                          <Image src={link.iconUrl} alt={link.platform} width={40} height={40} className="w-full h-full object-cover" unoptimized />
+                        ) : (
+                          <DefaultIcon className="w-6 h-6 text-black" />
+                        )}
+                      </a>
+                    );
+                  }
+
+                  // Empty placeholder for maintaining width
+                  return (
+                    <div
+                      key={i}
+                      style={{ transitionDelay: `${i * 50}ms` }}
+                      className="w-10 h-10 rounded-xl bg-gray-200 dark:bg-[#1A1A1A] border border-black/10 dark:border-white/10 transition-all duration-500 opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 pointer-events-none"
+                    />
+                  );
+                })}
               </div>
             </motion.div>
 
           </motion.div>
+
+          {/* Right Column - Image (Order 1 on mobile, Order 2 on LG) */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, ease: [0.25, 1, 0.5, 1] }}
+            className="lg:col-span-5 relative flex justify-center lg:justify-end order-1 lg:order-2 w-full mb-8 lg:mb-0"
+          >
+            <div className="relative w-64 h-80 sm:w-80 sm:h-[400px] lg:w-[400px] lg:h-[500px]">
+
+              {/* Minimalist Border Box */}
+              <div className="absolute inset-0 border border-black/20 dark:border-white/20 translate-x-4 translate-y-4 lg:translate-x-6 lg:translate-y-6 transition-transform duration-500 group-hover:translate-x-0 group-hover:translate-y-0" />
+
+              <div className="w-full h-full relative overflow-hidden bg-white dark:bg-[#111] z-10 grayscale hover:grayscale-0 transition-all duration-700 border border-black/10 dark:border-white/10">
+                {hero?.profileImage && (
+                  <Image
+                    src={hero.profileImage}
+                    alt="Profile"
+                    fill
+                    className="object-cover transition-transform duration-700 hover:scale-105"
+                    priority
+                    unoptimized
+                  />
+                )}
+                {/* Monochrome overlay */}
+                <div className="absolute inset-0 bg-black/20 mix-blend-multiply pointer-events-none" />
+              </div>
+
+              {/* Floating B&W Badge */}
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 1 }}
+                className="absolute -left-6 lg:-left-12 bottom-12 bg-white text-black p-4 shadow-2xl flex items-center gap-4 z-20"
+              >
+                <div className="w-10 h-10 bg-black flex items-center justify-center">
+                  <Sparkles className="w-5 h-5 text-black dark:text-white" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-600 dark:text-gray-500">Currently</p>
+                  <p className="text-sm font-black uppercase tracking-wider">Available</p>
+                </div>
+              </motion.div>
+
+            </div>
+          </motion.div>
+
         </div>
       </div>
+
+      {/* Scroll Down Animation */}
+      <motion.div
+        animate={{ y: [0, 8, 0] }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 opacity-70 hover:opacity-100 transition-opacity cursor-pointer"
+        onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}
+      >
+        <span className="text-[10px] uppercase tracking-widest text-black dark:text-white/50 font-bold mb-1">Scroll Down</span>
+        <ChevronDown className="w-6 h-6 text-black dark:text-white" />
+      </motion.div>
+
+      <AnimatePresence>
+        {isResumeModalOpen && hero?.resumeUrl && (
+          <ResumeModal url={hero.resumeUrl} onClose={() => setIsResumeModalOpen(false)} />
+        )}
+      </AnimatePresence>
+
     </section>
   );
 }

@@ -6,12 +6,12 @@ export interface SocialLink {
   platform: string;
   url: string;
   iconUrl?: string;
-  heroSectionId: string;
-  heroSection: HeroSection;
+  heroSectionId?: string;
+  heroSection?: HeroSection;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
-export type CreateSocialLinkDto = Omit<SocialLink, 'id' | 'createdAt' | 'updatedAt' | 'heroSection'>;
+export type CreateSocialLinkDto = Omit<SocialLink, 'id' | 'createdAt' | 'updatedAt' | 'heroSection' | 'heroSectionId'>;
 export type UpdateSocialLinkDto = Partial<CreateSocialLinkDto>;

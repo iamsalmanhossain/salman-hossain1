@@ -1,6 +1,5 @@
 import { SocialLink } from './socialLinks';
 
-
 export interface HeroSection {
   id: string;
   heroTitle: string;
@@ -8,7 +7,6 @@ export interface HeroSection {
   heroDescription?: string;
   profileImage?: string;
   resumeUrl?: string;
-  about: string;
   experienceYears?: number;
   totalProjects?: number;
   totalToolsAndTech?: number;
