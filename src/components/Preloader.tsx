@@ -47,7 +47,7 @@ export default function Preloader({ onLoadingComplete, isLoading }: PreloaderPro
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8, ease: "easeInOut" }}
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#0A0A0A]"
+          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black"
         >
           <div className="w-full max-w-md aspect-video relative flex flex-col items-center justify-center">
             <video

@@ -87,11 +87,13 @@ export default function PixelSnow({
 
     // Animation loop
     let animationFrameId: number;
-    const clock = new THREE.Clock();
+    let lastTime = performance.now();
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
-      const delta = clock.getDelta();
+      const currentTime = performance.now();
+      const delta = (currentTime - lastTime) / 1000;
+      lastTime = currentTime;
 
       const positions = geometry.attributes.position.array as Float32Array;
       const velocities = geometry.attributes.velocity.array as Float32Array;

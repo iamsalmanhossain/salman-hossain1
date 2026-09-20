@@ -9,8 +9,9 @@ import Projects from "./components/Projects";
 import Blog from "./components/Blog";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
-import GlowCursor from "./components/GlowCursor";
-import Sidebar from "@/components/Sidebar";
+import TargetCursor from "./components/TargetCursor";
+import Sidebar from "./components/Sidebar";
+import ScrollToTop from "./components/ScrollToTop";
 
 export default function TechDarkTheme({ websiteData, isLight, mounted }: any) {
   return (
@@ -18,27 +19,10 @@ export default function TechDarkTheme({ websiteData, isLight, mounted }: any) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8, ease: "easeInOut" }}
+      className="bg-gray-50 dark:bg-black min-h-screen w-full transition-colors duration-300"
     >
-      <GlowCursor
-        color={isLight ? "#0ea5e9" : "#67E8F9"}
-        secondaryColor={isLight ? "#8b5cf6" : "#A78BFA"}
-        trailLength={40}
-        trailWidth={8}
-        trailTaper={0.8}
-        followSpeed={0.16}
-        glowIntensity={isLight ? 2.5 : 1.9}
-        glowSpread={1.2}
-        hotspot={0.65}
-        brightness={1.25}
-        opacity={isLight ? 0.8 : 1}
-        pulseSpeed={1.1}
-        noiseStrength={0.035}
-        idleFade
-        idleTimeout={700}
-        fadeDuration={900}
-        blendMode={isLight ? "normal" : "screen"}
-        className="w-full min-h-screen z-0"
-      >
+      <div className="relative w-full min-h-screen z-0">
+        <TargetCursor cursorColor="#ffffff" cursorColorOnTarget="#ffffff" hideDefaultCursor={false} />
         <div style={{ width: '100%', height: '100%', position: 'fixed', top: 0, left: 0, zIndex: -1 }}>
           <PixelSnow
             color={isLight ? "#000000" : "#ffffff"}
@@ -68,7 +52,8 @@ export default function TechDarkTheme({ websiteData, isLight, mounted }: any) {
           <Contact />
           <Footer />
         </div>
-      </GlowCursor>
+        <ScrollToTop />
+      </div>
     </motion.div>
   );
 }

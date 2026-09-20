@@ -64,6 +64,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
+      data-scroll-behavior="smooth"
       className={cn("antialiased", poppins.variable, "font-sans", geist.variable)}
     >
       <body 
